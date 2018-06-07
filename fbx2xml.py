@@ -3,24 +3,22 @@ import re
 import xml.etree.cElementTree as etree
 import xml.dom.minidom as dom
 
-inputfile = open("simplecube.ASE", "r")
+inputfile = open("simplecube.FBX", "r")
 
 root = etree.Element("root")
 parents = []
 current_elem = root
 
-#The first line is "3DSMAX_ASCIIEXPORT	200",
-#the 3 at the beginning would make it an incorrect xml file,
-#so we just ignore this line
-inputfile.readline()
-
 line = inputfile.readline().strip().replace("\t", " ") # Always remove tabs
 while line:
-	regopen = re.match("\*(([A-Z]|\_| |[0-9])*) \{", line)
+	regopen = re.match("([a-zA-Z0-9]+): *{", line)
 	regset = re.match("\*(([A-Z]|\_|[0-9])*)([ ]|[\t])*(.*)", line)
+	if line.startswith(";") :
+		# This line is a comment
+		print("This line is a comment")
 
 	#Line starting with * and ending with {, we create a new child while remembering our parents
-	if regopen!=None :
+	elif regopen!=None :
 		parents.append(current_elem)
 
 		# Materials are written as "MATERIAL 3" or "SUBMATERIAL 3", Vertices as "MESH_VERTEX 0", "MESH_VERTEX 1", etc...
@@ -51,13 +49,13 @@ if parents != [] :
 	print("PARENTS LIST NOT EMPTY")
 
 tree = etree.ElementTree(root)
-tree.write("simplecubease.xml")
+tree.write("simplecube.xml")
 
 
-xmlstr = dom.parse("simplecubease.xml")
+xmlstr = dom.parse("simplecubefbx.xml")
 
 # print(xmlstr.toprettyxml())
-outputfile = open("simplecubease.xml", "w")
+outputfile = open("simplecubefbx.xml", "w")
 outputfile.write(xmlstr.toprettyxml())
 
 time.sleep(1)

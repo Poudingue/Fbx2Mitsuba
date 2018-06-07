@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<scene version="0.5.0">
+	<sensor type="perspective">
+		<transform name="toWorld">
+			<lookat origin="-45.642578 61.896660 53.037067" target="2.953839 0.738690 -3.716608"/>
+		</transform>
+		<float name="fov" value="75"/>
+	</sensor>
+	<sensor type="perspective">
+		<transform name="toWorld">
+			<lookat origin="58.758564 40.052151 24.618504" target="8.563131 20.523191 18.481869"/>
+		</transform>
+		<float name="fov" value="75"/>
+	</sensor>
+	<shape type="obj">
+		<string name="filename" value="finalmesh.obj"/>
+	</shape>
+</scene>
