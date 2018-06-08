@@ -44,12 +44,17 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 		print("FREE CAMERA UNFINISHED")
 	else:
 		print("Camera type unknown : "+camera_type)
+	# The default fov is 60 for max, and in the ase the fov is just the factor to multiply 60
+	fov = 60 * float(camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV"))
+	camera_fov = etree.SubElement(curr_camera, "float")
+	camera_fov.set("name", "fov")
+	camera_fov.set("value", str(fov))
+	# Max expresses the the vertical fov
+	camera_fov_axis = etree.SubElement(curr_camera, "string")
+	camera_fov_axis.set("name", "fovAxis")
+	camera_fov_axis.set("value", "y")
 
-	focalLength = camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV")
-	print(focalLength)
-	camera_focal_length = etree.SubElement(curr_camera, "float")
-	camera_focal_length.set("name", "fov")
-	camera_focal_length.set("value", focalLength)
+
 
 
 
@@ -66,4 +71,4 @@ xmlstr = dom.parse("simplecubemitsuba.xml")
 outputfile = open("simplecubemitsuba.xml", "w")
 outputfile.write(xmlstr.toprettyxml())
 
-time.sleep(1)
+# time.sleep(1)
