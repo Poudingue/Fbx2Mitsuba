@@ -19,7 +19,6 @@ inputfile.readline()
 
 line = inputfile.readline().strip().replace("\t", " ") # Always remove tabs
 while line:
-	print(str(countdown_to_closing))
 	if countdown_to_closing==0 :
 		current_elem = parents.pop()
 	if countdown_to_closing >= 0 :
@@ -53,7 +52,21 @@ while line:
 			parents.append(current_elem)
 			current_elem = etree.SubElement(current_elem, regelementoflist[1])
 			current_elem.set("id", regelementoflist[3])
-			current_elem.set("value", regelementoflist[4])
+			# MESH_FACE has multiple value, a little formating to have a cleaner xml
+			if regelementoflist[1] == "MESH_FACE" :
+				parts = regelementoflist[4].split("*")
+				parts2 = parts[0].replace(":"," ").split()
+				print(parts2)
+				current_elem.set("A", parts2[1])
+				current_elem.set("B", parts2[3])
+				current_elem.set("C", parts2[5])
+				current_elem.set("AB", parts2[7])
+				current_elem.set("BC", parts2[9])
+				current_elem.set("CA", parts2[11])
+				current_elem.set("MESH_SMOOTHING",parts[1].split( )[1])
+				current_elem.set("MESH_MTLID",parts[2].split( )[1])
+			else:
+				current_elem.set("value", regelementoflist[4].strip())
 
 		# FACENORMAL should be a new tag
 			if regelementoflist[1]=="MESH_FACENORMAL" :
