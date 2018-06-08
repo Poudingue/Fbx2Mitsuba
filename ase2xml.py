@@ -56,7 +56,6 @@ while line:
 			if regelementoflist[1] == "MESH_FACE" :
 				parts = regelementoflist[4].split("*")
 				parts2 = parts[0].replace(":"," ").split()
-				print(parts2)
 				current_elem.set("A", parts2[1])
 				current_elem.set("B", parts2[3])
 				current_elem.set("C", parts2[5])

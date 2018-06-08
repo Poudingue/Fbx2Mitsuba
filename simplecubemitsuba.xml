@@ -2,7 +2,7 @@
 <scene version="0.5.0">
 	<sensor type="perspective">
 		<transform name="toWorld">
-			<lookat origin="-45.642578 61.896660 53.037067" target="2.953839 0.738690 -3.716608"/>
+			<lookat origin="-43.922226 58.826923 57.818111" target="4.674189 -2.331048 1.064435"/>
 		</transform>
 		<float name="fov" value="89.69268"/>
 		<string name="fovAxis" value="y"/>
@@ -14,4 +14,22 @@
 		<float name="fov" value="59.26902"/>
 		<string name="fovAxis" value="y"/>
 	</sensor>
+	<emitter id="PhotometricLight001" type="point">
+		<spectrum name="intensity" value="1.000000 1.000000 1.000000"/>
+		<transform name="toWorld">
+			<translate x="-3.659199" y="-51.609138" z="53.714226"/>
+		</transform>
+	</emitter>
+	<emitter id="PhotometricLight002" type="point">
+		<spectrum name="intensity" value="0.078431 0.047059 0.694118"/>
+		<transform name="toWorld">
+			<translate x="-4.882706" y="25.699326" z="18.222042"/>
+		</transform>
+	</emitter>
+	<emitter id="Map #3" type="envmap">
+		<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\random skybox.png"/>
+	</emitter>
+	<shape type="obj">
+		<string name="filename" value="simplecube.obj"/>
+	</shape>
 </scene>
