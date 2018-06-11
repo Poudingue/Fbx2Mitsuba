@@ -1,35 +1,54 @@
 <?xml version="1.0" ?>
 <scene version="0.5.0">
 	<sensor type="perspective">
+		<film type="hdrfilm">
+			<integer name="width" value="1600"/>
+			<integer name="height" value="900"/>
+			<rfilter type="gaussian"/>
+		</film>
+		<sampler type="ldsampler">
+			<integer name="sampleCount" value="64"/>
+		</sampler>
 		<transform name="toWorld">
-			<lookat origin="-43.922226 58.826923 57.818111" target="4.674189 -2.331048 1.064435"/>
+			<lookat origin="-43.9222 58.8269 57.8181" target="4.6742 -2.3310 1.0644" up="0, 0, 1"/>
 		</transform>
-		<float name="fov" value="89.69268"/>
-		<string name="fovAxis" value="y"/>
+		<float name="fov" value="82.2195"/>
+		<string name="fovAxis" value="x"/>
 	</sensor>
 	<sensor type="perspective">
+		<film type="hdrfilm">
+			<integer name="width" value="1600"/>
+			<integer name="height" value="900"/>
+			<rfilter type="gaussian"/>
+		</film>
+		<sampler type="ldsampler">
+			<integer name="sampleCount" value="64"/>
+		</sampler>
 		<transform name="toWorld">
-			<lookat origin="58.758564 40.052151 24.618504" target="8.563131 20.523191 18.481869"/>
+			<lookat origin="58.7586 40.0522 24.6185" target="8.5631 20.5232 18.4819" up="0, 0, 1"/>
 		</transform>
-		<float name="fov" value="59.26902"/>
-		<string name="fovAxis" value="y"/>
+		<float name="fov" value="54.329"/>
+		<string name="fovAxis" value="x"/>
 	</sensor>
-	<emitter id="PhotometricLight001" type="point">
-		<spectrum name="intensity" value="1.000000 1.000000 1.000000"/>
+	<shape type="sphere">
+		<float name="radius" value="7.800003
+"/>
+		<emitter id="PhotometricLight001" type="area">
+			<spectrum name="radiance" value="16.436542254596883 16.436542254596883 16.436542254596883"/>
+		</emitter>
 		<transform name="toWorld">
-			<translate x="-3.659199" y="-51.609138" z="53.714226"/>
+			<translate x="-3.6592" y="-51.6091" z="53.7142"/>
 		</transform>
-	</emitter>
+	</shape>
 	<emitter id="PhotometricLight002" type="point">
-		<spectrum name="intensity" value="0.078431 0.047059 0.694118"/>
+		<spectrum name="intensity" value="78.39999999999999 47.1 694.1"/>
 		<transform name="toWorld">
-			<translate x="-4.882706" y="25.699326" z="18.222042"/>
+			<translate x="-4.8827" y="25.6993" z="18.2220"/>
 		</transform>
 	</emitter>
-	<emitter id="Map #3" type="envmap">
-		<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\random skybox.png"/>
-	</emitter>
+
 	<shape type="obj">
 		<string name="filename" value="simplecube.obj"/>
+		<transform name="toWorld"/>
 	</shape>
 </scene>
