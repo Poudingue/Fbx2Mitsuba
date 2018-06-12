@@ -77,7 +77,8 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 		print("FREE CAMERA UNFINISHED")
 	else:
 		print("Camera type unknown : "+camera_type)
-	fov = 55 * float(camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV"))
+	# The real angle can be accessed in the fbx file for some elements, it allowed me to chose the right multiplier
+	fov = 57.29677533 * float(camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV"))
 	camera_fov = etree.SubElement(curr_camera, "float")
 	camera_fov.set("name", "fov")
 	camera_fov.set("value", str(fov))
@@ -89,6 +90,10 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 # Set up lights
 for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 	light_name = light.getAttribute("NODE_NAME")
+
+	# TODO a better method to search for stuff in the FBX. Probably convert it to xml
+
+	# Search for the light reference in the fbx file
 	light_ref = ""
 	nexturn = False
 	for line in open("simplecube.fbx", "r") :
@@ -105,12 +110,12 @@ for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 	if light_ref=="" :
 		print("Light not found in fbx : "+light_name)
 
+	# Searching in the FBX file for sphere light source
 	light_is_a_sphere = False
 	sphere_radius = 0
 	searchBegan = False
 	for line in open("simplecube.fbx", "r") :
 		if searchBegan and not (line.startswith("\t\tProperties70:") or line.startswith("\t\t\tP: ")):
-			print("BROKE WITH LINE : "+line)
 			break
 		if searchBegan :
 			if "FSphereParameters" in line :
@@ -120,7 +125,6 @@ for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 				sphere_radius = radius_extraction[len(radius_extraction)-1]#
 		reg_lightdef = re.match("\tNodeAttribute: "+light_ref+", \"NodeAttribute::\", \"Light\" {", line)
 		if reg_lightdef!=None:
-			print("Search began at "+line)
 			searchBegan = True
 
 	# There should be only one node for pointlight. Maybe not for more complex light, TODO
@@ -194,17 +198,16 @@ else :
 		envmap_brightness.set("value", "1")
 
 
-# Dirty workaround to put the exported obj
-# Not a very good idea, because all the texture properties are not exported in the obj
-shape = etree.SubElement(root, "shape")
-shape.set("type", "obj")
-importshape = etree.SubElement(shape, "string")
-importshape.set("name", "filename")
-importshape.set("value", "simplecube.obj")
-shape_transf = etree.SubElement(shape, "transform")
-shape_transf.set("name", "toWorld")
-
-
+# import .ply exported by plybuilder.py
+for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
+	name =  geomobject.getAttribute("NODE_NAME")
+	shape = etree.SubElement(root, "shape")
+	shape.set("type", "ply")
+	importshape = etree.SubElement(shape, "string")
+	importshape.set("name", "filename")
+	importshape.set("value", "meshes/"+name+".ply")
+	shape_transf = etree.SubElement(shape, "transform")
+	shape_transf.set("name", "toWorld")
 
 tree = etree.ElementTree(root)
 tree.write("simplecubemitsuba.xml")

@@ -10,9 +10,9 @@
 			<integer name="sampleCount" value="64"/>
 		</sampler>
 		<transform name="toWorld">
-			<lookat origin="-43.9222 58.8269 57.8181" target="4.6742 -2.3310 1.0644" up="0, 0, 1"/>
+			<lookat origin="-43.9222260 58.8269234 57.8181114" target="4.6741891 -2.3310478 1.0644349" up="0, 0, 1"/>
 		</transform>
-		<float name="fov" value="82.2195"/>
+		<float name="fov" value="85.65170037111481"/>
 		<string name="fovAxis" value="x"/>
 	</sensor>
 	<sensor type="perspective">
@@ -25,30 +25,49 @@
 			<integer name="sampleCount" value="64"/>
 		</sampler>
 		<transform name="toWorld">
-			<lookat origin="58.7586 40.0522 24.6185" target="8.5631 20.5232 18.4819" up="0, 0, 1"/>
+			<lookat origin="51.9405212 51.8968353 39.2265778" target="6.8345904 30.1316166 18.4816723" up="0, 0, 1"/>
 		</transform>
-		<float name="fov" value="54.329"/>
+		<float name="fov" value="56.598740175509676"/>
 		<string name="fovAxis" value="x"/>
 	</sensor>
 	<shape type="sphere">
 		<float name="radius" value="7.800003
 "/>
 		<emitter id="PhotometricLight001" type="area">
-			<spectrum name="radiance" value="16.436542254596883 16.436542254596883 16.436542254596883"/>
+			<spectrum name="radiance" value="16.436542254596883 16.43654061094266 16.436543898251113"/>
 		</emitter>
 		<transform name="toWorld">
-			<translate x="-3.6592" y="-51.6091" z="53.7142"/>
+			<translate x="-3.6591985" y="-51.6091385" z="53.7142258"/>
 		</transform>
 	</shape>
 	<emitter id="PhotometricLight002" type="point">
-		<spectrum name="intensity" value="78.39999999999999 47.1 694.1"/>
+		<spectrum name="intensity" value="78.4314 47.0588 694.1176999999999"/>
 		<transform name="toWorld">
-			<translate x="-4.8827" y="25.6993" z="18.2220"/>
+			<translate x="-4.8827057" y="25.6993256" z="18.2220421"/>
 		</transform>
 	</emitter>
-
-	<shape type="obj">
-		<string name="filename" value="simplecube.obj"/>
+	<emitter id="Map #3" type="envmap">
+		<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\random skybox.png"/>
+		<transform name="toWorld">
+			<rotate angle="90" x="1"/>
+			<scale x="-1"/>
+		</transform>
+		<float name="scale" value="1"/>
+	</emitter>
+	<shape type="ply">
+		<string name="filename" value="meshes/Plane001.ply"/>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Box001.ply"/>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/GeoSphere001.ply"/>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/GeoSphere002.ply"/>
 		<transform name="toWorld"/>
 	</shape>
 </scene>

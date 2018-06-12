@@ -1,5 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 11.06.2018 15:16:13
+# File Created: 12.06.2018 11:52:51
 
 newmtl wire_228184153
 	Ns 32
@@ -98,3 +98,23 @@ newmtl Material__24
 	Ke 0.000000 0.000000 0.000000
 	map_Ka C:\Users\tcusson\Desktop\simplecube\wood-texture0038-e1454786428595.jpg
 	map_Kd C:\Users\tcusson\Desktop\simplecube\wood-texture0038-e1454786428595.jpg
+
+newmtl wire_225087143
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.882353 0.341176 0.560784
+	Kd 0.882353 0.341176 0.560784
+	Ks 0.350000 0.350000 0.350000
+
+newmtl wire_228214153
+	Ns 32
+	d 1
+	Tr 0
+	Tf 1 1 1
+	illum 2
+	Ka 0.894118 0.839216 0.600000
+	Kd 0.894118 0.839216 0.600000
+	Ks 0.350000 0.350000 0.350000

@@ -9,47 +9,43 @@ root = etree.Element("root")
 parents = []
 current_elem = root
 
-line = inputfile.readline().strip().replace("\t", " ") # Always remove tabs
+line = inputfile.readline().replace("\"","")
 while line:
-	regopen = re.match("([a-zA-Z0-9]+): *{", line)
-	regset = re.match("\*(([A-Z]|\_|[0-9])*)([ ]|[\t])*(.*)", line)
-	if line.startswith(";") :
-		# This line is a comment
-		print("This line is a comment")
-
-	#Line starting with * and ending with {, we create a new child while remembering our parents
-	elif regopen!=None :
+	# Comments in the fbx can give useful informations
+	reg_comment = re.match(";(.*)", line.strip())
+	#
+	reg_opening = re.match("([A-Za-z0-9_]+):(.*) *{", line.strip())
+	reg_info = re.match("([A-Za-z0-9_]+): *(.*)", line.strip())
+	if len(line.strip())==0 :
+		pass
+	elif reg_comment!=None :
+		comment = etree.SubElement(current_elem, "comment")
+		comment.text = reg_comment[1]
+	elif reg_opening!=None :
 		parents.append(current_elem)
-
-		# Materials are written as "MATERIAL 3" or "SUBMATERIAL 3", Vertices as "MESH_VERTEX 0", "MESH_VERTEX 1", etc...
-		# we should write "MATERIAL_” or "SUBMATERIAL_3" to have a correct XML document
-		regwrongspace = re.match("(.*MATERIAL|(MESH_(VERTEX|TFACE|FACE|TVERT|VERT|FACENORMAL|VERTEXNORMAL))) (\d)", regopen[1])
-		if regwrongspace!=None :
-			current_elem = etree.SubElement(current_elem, (regwrongspace[1]+"_"+regwrongspace[4]))
-		else :
-			current_elem = etree.SubElement(current_elem, regopen[1])
-
-	#Line starting with * but not ending with {, we set the correct property
-	elif  regset!=None :
-		current_elem.set(regset[1], regset[4].replace("\"","")) # Removing unwanted quotes
-
-	# we go back to the parent element
-	elif line=="}" :
-		# Debug print
-		if parents==[]:
-			print("NO PARENTS FOUND")
-		else :
-			current_elem = parents.pop()
+		current_elem = etree.SubElement(current_elem, reg_opening[1].replace(" ","").replace(":",""))
+	elif reg_info!=None :
+		moretext = ""
+		if reg_info[2].endswith(",") :
+			moretext+=inputfile.readline().strip()
+		while moretext.endswith(",") :
+			moretext+=inputfile.readline().strip()
+		elem = etree.SubElement(current_elem, reg_info[1])
+		elem.text = reg_info[2]+moretext
+	elif line.strip().endswith("}") :
+		current_elem = parents.pop()
 	else :
-		print("UNRECOGNIZED LINE : "+line)
+		print("unknown : "+line)
+		stuff = etree.SubElement(current_elem, "stuff")
+		stuff.text = line
+	line = inputfile.readline().replace("\"","")
 
-	line = inputfile.readline().strip().replace("\t", " ") # Always remove tabs
-
-if parents != [] :
+if parents != [root] :
 	print("PARENTS LIST NOT EMPTY")
+	print(parents)
 
 tree = etree.ElementTree(root)
-tree.write("simplecube.xml")
+tree.write("simplecubefbx.xml")
 
 
 xmlstr = dom.parse("simplecubefbx.xml")
