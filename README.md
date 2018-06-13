@@ -1,7 +1,12 @@
-# ASE2Mitsuba
+# Max2Mitsuba
 
-A conversion from 3Dsmax to the Mitsuba renderer.
-My approach for now is to export in ASE (Ascii Scene Export), and convert as much info as possible into a Mitsuba renderer file.
+A converter from 3dsmax scenes to mitsuba renderer scenes.
+
+Howto :
+- export the 3dsmax scene to ase and fbx (for now with the file name being «simplecube»)
+- install python if you don't have it already
+- use ase2xml and fbx2xml
+- use plybuilder and asexml2mitsubaxml
 
 ase2xml.py can be used to convert the ase into xml.
 fbx2xml.py does the same from an fbx file.
