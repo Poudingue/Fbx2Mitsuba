@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <scene version="0.5.0">
+	<integrator type="path"/>
 	<sensor type="perspective">
 		<film type="hdrfilm">
 			<integer name="width" value="1600"/>
@@ -10,7 +11,7 @@
 			<integer name="sampleCount" value="64"/>
 		</sampler>
 		<transform name="toWorld">
-			<lookat origin="-43.9222260 58.8269234 57.8181114" target="4.6741891 -2.3310478 1.0644349" up="0, 0, 1"/>
+			<lookat origin="-39.9659691 62.5528641 58.2727966" target="12.3149605 -3.2420421 10.7267656" up="0, 0, 1"/>
 		</transform>
 		<float name="fov" value="85.65170037111481"/>
 		<string name="fovAxis" value="x"/>
@@ -34,18 +35,22 @@
 		<float name="radius" value="7.800003
 "/>
 		<emitter id="PhotometricLight001" type="area">
-			<spectrum name="radiance" value="16.436542254596883 16.43654061094266 16.436543898251113"/>
+			<spectrum name="radiance" value="5.231913894315801 5.231913371124412 5.231914417507191"/>
 		</emitter>
 		<transform name="toWorld">
 			<translate x="-3.6591985" y="-51.6091385" z="53.7142258"/>
 		</transform>
 	</shape>
-	<emitter id="PhotometricLight002" type="point">
-		<spectrum name="intensity" value="78.4314 47.0588 694.1176999999999"/>
+	<shape type="sphere">
+		<float name="radius" value="1.05206
+"/>
+		<emitter id="PhotometricLight002" type="area">
+			<spectrum name="radiance" value="22.55584372724974 13.533494732873569 199.61916234464786"/>
+		</emitter>
 		<transform name="toWorld">
 			<translate x="-4.8827057" y="25.6993256" z="18.2220421"/>
 		</transform>
-	</emitter>
+	</shape>
 	<emitter id="Map #3" type="envmap">
 		<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\random skybox.png"/>
 		<transform name="toWorld">

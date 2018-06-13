@@ -1,1 +1,0 @@
-<ImageSequence Pattern="3dsmaxoutput.jpg" First="0" Last="0" FrameRate="30/1"><D3dsMaxData><OutputType>Custom</OutputType><ApertureWidth>36,000000</ApertureWidth><PixelAspect>1,000000</PixelAspect><Width>1600</Width><Height>900</Height><OutputCamera>badcamera</OutputCamera><Name>simplecube.max</Name><CompositeLayer><Name/><Type/></CompositeLayer></D3dsMaxData></ImageSequence>

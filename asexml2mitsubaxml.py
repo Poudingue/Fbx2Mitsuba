@@ -1,4 +1,6 @@
 import time
+import re
+import math
 import xml.etree.cElementTree as etree
 import xml.dom.minidom as dom
 
@@ -12,6 +14,10 @@ inputfile.close()
 root = etree.Element("scene")
 
 root.set("version", "0.5.0")
+
+# Set up the integrator. For now pathtracing.
+integrator = etree.SubElement(root, "integrator")
+integrator.set("type", "path")
 
 # Set up cameras
 
@@ -64,7 +70,7 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 		lookat_camera.set("origin", origin)
 		lookat_camera.set("target", target)
 		# We need to specify the «up» direction. In 3dsmax it's y.
-		# Won't work with tilted camera yet, to be fixed
+		# Won't work with tilted camera yet, to be fixed. Info is in the fbx
 		lookat_camera.set("up", "0, 0, 1")
 	elif(camera_type=="Free"):
 		transl_camera = etree.SubElement(transf_camera, "translate")
@@ -76,7 +82,9 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 		print("FREE CAMERA UNFINISHED")
 	else:
 		print("Camera type unknown : "+camera_type)
-	fov = 55 * float(camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV"))
+	# The real angle can be accessed in the fbx file for some elements, it allowed me to chose the right multiplier.
+	# TODO take the fov directly from the fbx
+	fov = 57.29677533 * float(camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV"))
 	camera_fov = etree.SubElement(curr_camera, "float")
 	camera_fov.set("name", "fov")
 	camera_fov.set("value", str(fov))
@@ -88,6 +96,43 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 # Set up lights
 for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 	light_name = light.getAttribute("NODE_NAME")
+
+	# TODO a better method to search for stuff in the FBX. Probably convert it to xml
+
+	# Search for the light reference in the fbx file
+	light_ref = ""
+	nexturn = False
+	for line in open("simplecube.fbx", "r") :
+		if nexturn :
+			reg_lightref = re.match("\tC: \"OO\",(\d*),\d*\n", line)
+			if reg_lightref!=None :
+				light_ref = reg_lightref[1]
+			else :
+				print("LIGHT REFERENCE NOT FOUND : "+light_name)
+			break
+		if line == "\t;NodeAttribute::, Model::"+light_name+"\n":
+			nexturn = True
+
+	if light_ref=="" :
+		print("Light not found in fbx : "+light_name)
+
+	# Searching in the FBX file for sphere light source
+	light_is_a_sphere = False
+	sphere_radius = 0
+	searchBegan = False
+	for line in open("simplecube.fbx", "r") :
+		if searchBegan and not (line.startswith("\t\tProperties70:") or line.startswith("\t\t\tP: ")):
+			break
+		if searchBegan :
+			if "FSphereParameters" in line :
+				light_is_a_sphere = True
+			if "FSphereExtParameters|light_radius" in line :
+				radius_extraction = line.split(",")
+				sphere_radius = radius_extraction[len(radius_extraction)-1]#
+		reg_lightdef = re.match("\tNodeAttribute: "+light_ref+", \"NodeAttribute::\", \"Light\" {", line)
+		if reg_lightdef!=None:
+			searchBegan = True
+
 	# There should be only one node for pointlight. Maybe not for more complex light, TODO
 	node = light.getElementsByTagName("NODE_TM")[0]
 	light_pos = node.getAttribute("TM_POS").split()
@@ -96,19 +141,28 @@ for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 	# With arbitrary tries, it seems that multiplying by 10000 the light intensity is the way to go
 	colors = ""
 	for component in light_color :
-		colors += " " + str(float(component)*1000)
-
+		# Divide the radiance by the apparent surface of the light to have the same intensity as a zero-sized pointlight
+		colors += " " + str(float(component)*1000/((math.pi * float(sphere_radius)**2) if light_is_a_sphere else 1))
 
 	light_intensity = light_parameters.getAttribute("LIGHT_INTENS")
 
-	light_in_scene = etree.SubElement(root, "emitter")
-	light_in_scene.set("type", "point")
+	if light_is_a_sphere :
+		light_shape = etree.SubElement(root, "shape")
+		light_shape.set("type", "sphere")
+
+		light_radius = etree.SubElement(light_shape, "float")
+		light_radius.set("name", "radius")
+		light_radius.set("value", sphere_radius)
+
+	light_in_scene = etree.SubElement(light_shape if light_is_a_sphere else root, "emitter")
+	light_in_scene.set("type", "area" if light_is_a_sphere else "point")
 	light_in_scene.set("id",light_name)
+
 	light_color_in_scene = etree.SubElement(light_in_scene, "spectrum")
-	light_color_in_scene.set("name", "intensity")
+	light_color_in_scene.set("name", "radiance" if light_is_a_sphere else "intensity")
 	light_color_in_scene.set("value", colors.strip())
 
-	light_transform_in_scene = etree.SubElement(light_in_scene, "transform")
+	light_transform_in_scene = etree.SubElement(light_shape if light_is_a_sphere else light_in_scene, "transform")
 	light_transform_in_scene.set("name","toWorld")
 	light_translate_in_scene = etree.SubElement(light_transform_in_scene, "translate")
 
@@ -149,17 +203,16 @@ else :
 		envmap_brightness.set("value", "1")
 
 
-# Dirty workaround to put the exported obj
-# Not a very good idea, because all the texture properties are not exported in the obj
-shape = etree.SubElement(root, "shape")
-shape.set("type", "obj")
-importshape = etree.SubElement(shape, "string")
-importshape.set("name", "filename")
-importshape.set("value", "simplecube.obj")
-shape_transf = etree.SubElement(shape, "transform")
-shape_transf.set("name", "toWorld")
-
-
+# import .ply exported by plybuilder.py
+for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
+	name =  geomobject.getAttribute("NODE_NAME")
+	shape = etree.SubElement(root, "shape")
+	shape.set("type", "ply")
+	importshape = etree.SubElement(shape, "string")
+	importshape.set("name", "filename")
+	importshape.set("value", "meshes/"+name+".ply")
+	shape_transf = etree.SubElement(shape, "transform")
+	shape_transf.set("name", "toWorld")
 
 tree = etree.ElementTree(root)
 tree.write("simplecubemitsuba.xml")
