@@ -1,0 +1,1 @@
+<bsdf id="GeoSphere002_material_1" type="phong"><float name="exponent" value="22.0" /><spectrum name="diffuseReflectance" value="1.0000000 1.0000000 1.0000000" /><spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000" /></bsdf>

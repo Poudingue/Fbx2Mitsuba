@@ -11,9 +11,9 @@
 			<integer name="sampleCount" value="64"/>
 		</sampler>
 		<transform name="toWorld">
-			<lookat origin="-39.9659691 62.5528641 58.2727966" target="12.3149605 -3.2420421 10.7267656" up="0, 0, 1"/>
+			<lookat origin="-52.8000526 69.4772797 63.9907417" target="7.3230119 -6.1868906 9.3128185" up="0, 0, 1"/>
 		</transform>
-		<float name="fov" value="85.65170037111481"/>
+		<float name="fov" value="85.65205561112185"/>
 		<string name="fovAxis" value="x"/>
 	</sensor>
 	<sensor type="perspective">
@@ -26,7 +26,7 @@
 			<integer name="sampleCount" value="64"/>
 		</sampler>
 		<transform name="toWorld">
-			<lookat origin="51.9405212 51.8968353 39.2265778" target="6.8345904 30.1316166 18.4816723" up="0, 0, 1"/>
+			<lookat origin="79.7606659 62.5673027 46.8684311" target="9.3954153 28.6135540 14.5063610" up="0, 0, 1"/>
 		</transform>
 		<float name="fov" value="56.598740175509676"/>
 		<string name="fovAxis" value="x"/>
@@ -60,19 +60,113 @@
 		<float name="scale" value="1"/>
 	</emitter>
 	<shape type="ply">
-		<string name="filename" value="meshes/Plane001.ply"/>
+		<string name="filename" value="meshes/Plane001_0.ply"/>
+		<bsdf id="Plane001_material_0" type="diffuse">
+			<spectrum name="diffuseReflectance" value="0.5294118 0.0235294 0.0235294"/>
+		</bsdf>
 		<transform name="toWorld"/>
 	</shape>
 	<shape type="ply">
-		<string name="filename" value="meshes/Box001.ply"/>
+		<string name="filename" value="meshes/Box001_0.ply"/>
+		<bsdf id="Box001_material_0" type="phong">
+			<float name="exponent" value="10.0"/>
+			<texture name="diffuseReflectance" type="bitmap">
+				<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\wood-texture0038-e1454786428595.jpg"/>
+			</texture>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
 		<transform name="toWorld"/>
 	</shape>
 	<shape type="ply">
-		<string name="filename" value="meshes/GeoSphere001.ply"/>
+		<string name="filename" value="meshes/Box001_1.ply"/>
+		<bsdf id="Box001_material_1" type="phong">
+			<float name="exponent" value="10.0"/>
+			<spectrum name="diffuseReflectance" value="0.5880000 0.5880000 0.5880000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
 		<transform name="toWorld"/>
 	</shape>
 	<shape type="ply">
-		<string name="filename" value="meshes/GeoSphere002.ply"/>
+		<string name="filename" value="meshes/Box001_2.ply"/>
+		<bsdf id="Box001_material_2" type="phong">
+			<float name="exponent" value="10.0"/>
+			<spectrum name="diffuseReflectance" value="0.5880000 0.5880000 0.5880000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Box001_3.ply"/>
+		<bsdf id="Box001_material_3" type="phong">
+			<float name="exponent" value="10.0"/>
+			<spectrum name="diffuseReflectance" value="0.5880000 0.5880000 0.5880000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Box001_4.ply"/>
+		<bsdf id="Box001_material_4" type="phong">
+			<float name="exponent" value="10.0"/>
+			<spectrum name="diffuseReflectance" value="0.5880000 0.5880000 0.5880000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Box001_5.ply"/>
+		<bsdf id="Box001_material_5" type="phong">
+			<float name="exponent" value="10.0"/>
+			<spectrum name="diffuseReflectance" value="0.5880000 0.5880000 0.5880000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Box001_6.ply"/>
+		<bsdf id="Box001_material_6" type="phong">
+			<float name="exponent" value="43.0"/>
+			<texture name="diffuseReflectance" type="bitmap">
+				<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\wood-texture0038-e1454786428595.jpg"/>
+			</texture>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/GeoSphere001_0.ply"/>
+		<bsdf id="GeoSphere001_material_1" type="phong">
+			<float name="exponent" value="76.0"/>
+			<spectrum name="diffuseReflectance" value="0.0000000 0.0000000 0.0000000"/>
+			<spectrum name="specularReflectance" value="1.0000000 0.3019608 0.0352941"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/GeoSphere002_0.ply"/>
+		<bsdf id="GeoSphere002_material_0" type="phong">
+			<float name="exponent" value="200.0"/>
+			<spectrum name="diffuseReflectance" value="0.0000000 0.0000000 0.0000000"/>
+			<spectrum name="specularReflectance" value="1.0000000 1.0000000 1.0000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/GeoSphere002_1.ply"/>
+		<bsdf id="GeoSphere002_material_1" type="phong">
+			<float name="exponent" value="22.0"/>
+			<spectrum name="diffuseReflectance" value="1.0000000 1.0000000 1.0000000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
+		<transform name="toWorld"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/GeoSphere003_0.ply"/>
+		<bsdf id="GeoSphere003_material_0" type="phong">
+			<float name="exponent" value="10.0"/>
+			<spectrum name="diffuseReflectance" value="0.5880000 0.5880000 0.5880000"/>
+			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+		</bsdf>
 		<transform name="toWorld"/>
 	</shape>
 </scene>

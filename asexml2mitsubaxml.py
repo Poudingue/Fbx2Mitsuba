@@ -1,6 +1,8 @@
 import time
 import re
 import math
+import copy
+from pathlib import Path
 import xml.etree.cElementTree as etree
 import xml.dom.minidom as dom
 
@@ -65,7 +67,7 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 			else :
 				print("UNKNOWN CAMERA NODE :\ncamera : "+camera_name+"\nnode : "+node_name)
 		if origin == "INVALID ORIGIN" or target == "INVALID TARGET":
-			print("INVALID ORIGIN OR TARGET for camera "+camera_name)
+			print("invalid origin or target for camera "+camera_name)
 
 		lookat_camera.set("origin", origin)
 		lookat_camera.set("target", target)
@@ -75,7 +77,7 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 	elif(camera_type=="Free"):
 		transl_camera = etree.SubElement(transf_camera, "translate")
 		coordinates = origin.split()
-		print("FREE CAMERA COORD :\nx: "+coordinates[0]+" y: "+coordinates[1]+" z: "+coordinates[2])
+		print("free camera coord :\nx: "+coordinates[0]+" y: "+coordinates[1]+" z: "+coordinates[2])
 		transl_camera.set("x", coordinates[0])
 		transl_camera.set("y", coordinates[1])
 		transl_camera.set("z", coordinates[2])
@@ -97,9 +99,12 @@ for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
 for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 	light_name = light.getAttribute("NODE_NAME")
 
-	# TODO a better method to search for stuff in the FBX. Probably convert it to xml
-
 	# Search for the light reference in the fbx file
+	# It means going through the fbx file twice for each light
+	# But the xml version would be even harder to go through for this specific task.
+
+	# TODO Go through the fbx once and take all the useful info
+
 	light_ref = ""
 	nexturn = False
 	for line in open("simplecube.fbx", "r") :
@@ -108,7 +113,7 @@ for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
 			if reg_lightref!=None :
 				light_ref = reg_lightref[1]
 			else :
-				print("LIGHT REFERENCE NOT FOUND : "+light_name)
+				print("Light reference not found : "+light_name)
 			break
 		if line == "\t;NodeAttribute::, Model::"+light_name+"\n":
 			nexturn = True
@@ -178,7 +183,7 @@ if envmap==[] :
 else :
 	bitmap_location = envmap[0].getAttribute("BITMAP")
 	if bitmap_location=="":
-		print("ONLY IMAGES ARE SUPPORTED FOR ENVIRONNEMENT MAP")
+		print("Only images are supported for envmap")
 	else:
 		envmap_scene = etree.SubElement(root, "emitter")
 		envmap_scene.set("type","envmap")
@@ -206,13 +211,24 @@ else :
 # import .ply exported by plybuilder.py
 for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
 	name =  geomobject.getAttribute("NODE_NAME")
-	shape = etree.SubElement(root, "shape")
-	shape.set("type", "ply")
-	importshape = etree.SubElement(shape, "string")
-	importshape.set("name", "filename")
-	importshape.set("value", "meshes/"+name+".ply")
-	shape_transf = etree.SubElement(shape, "transform")
-	shape_transf.set("name", "toWorld")
+	i=0
+	while Path("meshes/"+name+"_"+str(i)+".ply").is_file():
+		shape = etree.SubElement(root, "shape")
+		shape.set("type", "ply")
+		importshape = etree.SubElement(shape, "string")
+		importshape.set("name", "filename")
+		importshape.set("value", "meshes/"+name+"_"+str(i)+".ply")
+		material_file_name = "materials/"+name+"_material_"+str(i)+".xml"
+		if Path(material_file_name).is_file():
+			print("file "+material_file_name+" found")
+			material_file = open(material_file_name, "r")
+			material_tree = etree.fromstring(material_file.read())
+			material_file.close()
+			shape.append(material_tree)
+
+		shape_transf = etree.SubElement(shape, "transform")
+		shape_transf.set("name", "toWorld")
+		i+=1
 
 tree = etree.ElementTree(root)
 tree.write("simplecubemitsuba.xml")
