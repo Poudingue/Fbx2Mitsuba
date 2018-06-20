@@ -25,6 +25,8 @@ for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
 	# Contains triplets of vertex ids, and vertex normals.
 	mesh_normals_list  = mesh.getElementsByTagName("MESH_NORMALS")[0].getElementsByTagName("MESH_FACENORMAL")
 	# Get the uv from the fbx file
+	input_uv = open("fbxinfos/Geometry_"+ name +"_uv.txt", "r")
+	mesh_uv_list = input_uv.readline().split(",")
 
 	# Materials of the scene
 	list_materials=[]
@@ -137,7 +139,9 @@ for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
 				print("MESH_VERTICES not in the order of id")
 			vertexcoords = mesh_vertices_list[idvertex].getAttribute("value")
 			vertexnormals = vertex.getAttribute("value")
-			curr_output_vertices.append(vertexcoords+" "+vertexnormals)
+			# TODO voir comment accéder à l'uvmap proprement
+			uvmap = mesh_uv_list[idvertex]
+			curr_output_vertices.append(vertexcoords+" "+vertexnormals+" "+uvmap)
 
 	for i in range(len(output_vertices_list)) :
 		output_vertices = output_vertices_list[i]
@@ -160,6 +164,8 @@ for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
 		output.write("property float32 nx\n")
 		output.write("property float32 ny\n")
 		output.write("property float32 nz\n")
+		output.write("property float32 u\n")
+		output.write("property float32 v\n")
 		output.write("element face "+str(len(output_faces_list[matplace]))+"\n")
 		output.write("property list uint8 int32 vertex_indices\n")
 		output.write("end_header\n")

@@ -51,8 +51,8 @@
 			<translate x="-4.8827057" y="25.6993256" z="18.2220421"/>
 		</transform>
 	</shape>
-	<emitter id="Map #3" type="envmap">
-		<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\random skybox.png"/>
+	<emitter id="Map #4" type="envmap">
+		<string name="filename" value="C:\Users\tcusson\Desktop\simplecube\random skybox.exr"/>
 		<transform name="toWorld">
 			<rotate angle="90" x="1"/>
 			<scale x="-1"/>
@@ -156,7 +156,7 @@
 		<bsdf id="GeoSphere002_material_1" type="phong">
 			<float name="exponent" value="22.0"/>
 			<spectrum name="diffuseReflectance" value="1.0000000 1.0000000 1.0000000"/>
-			<spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000"/>
+			<spectrum name="specularReflectance" value="1.0000000 1.0000000 1.0000000"/>
 		</bsdf>
 		<transform name="toWorld"/>
 	</shape>

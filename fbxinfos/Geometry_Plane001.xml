@@ -1,0 +1,50 @@
+<Geometry value="1983542304, Geometry::, Mesh">
+			<Properties70 value="">
+				<P>Color, ColorRGB, Color, ,0.529411764705882,0.0235294117647059,0.0235294117647059</P>
+			</Properties70>
+			<Vertices value="*27">
+				<a>-72.2073059082031,-76.3531799316406,0,0,-76.3531799316406,0,72.2073059082031,-76.3531799316406,0,-72.2073059082031,0,0,0,0,0,72.2073059082031,0,0,-72.2073059082031,76.3531799316406,0,0,76.3531799316406,0,72.2073059082031,76.3531799316406,0</a>
+			</Vertices>
+			<PolygonVertexIndex value="*16">
+				<a>0,1,4,-4,1,2,5,-5,3,4,7,-7,4,5,8,-8</a>
+			</PolygonVertexIndex>
+			<Edges value="*12">
+				<a>3,2,1,0,6,5,4,11,10,9,14,13</a>
+			</Edges>
+			<GeometryVersion>124</GeometryVersion>
+			<LayerElementNormal value="0">
+				<Version>102</Version>
+				<Name/>
+				<MappingInformationType>ByPolygonVertex</MappingInformationType>
+				<ReferenceInformationType>Direct</ReferenceInformationType>
+				<Normals value="*48">
+					<a>0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1</a>
+				</Normals>
+				<NormalsW value="*16">
+					<a>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</a>
+				</NormalsW>
+			</LayerElementNormal>
+			<LayerElementUV value="0">
+				<Version>101</Version>
+				<Name>UVChannel_1</Name>
+				<MappingInformationType>ByPolygonVertex</MappingInformationType>
+				<ReferenceInformationType>IndexToDirect</ReferenceInformationType>
+				<UV value="*18">
+					<a>0,0,0.5,0,1,0,0,0.5,0.5,0.5,1,0.5,0,1,0.5,1,1,1</a>
+				</UV>
+				<UVIndex value="*16">
+					<a>0,1,4,3,1,2,5,4,3,4,7,6,4,5,8,7</a>
+				</UVIndex>
+			</LayerElementUV>
+			<Layer value="0">
+				<Version>100</Version>
+				<LayerElement value="">
+					<Type>LayerElementNormal</Type>
+					<TypedIndex>0</TypedIndex>
+				</LayerElement>
+				<LayerElement value="">
+					<Type>LayerElementUV</Type>
+					<TypedIndex>0</TypedIndex>
+				</LayerElement>
+			</Layer>
+		</Geometry>
