@@ -1,1 +1,0 @@
-<bsdf id="Box001_material_0" type="phong"><float name="exponent" value="10.0" /><texture name="diffuseReflectance" type="bitmap"><string name="filename" value="C:\Users\tcusson\Desktop\simplecube\wood-texture0038-e1454786428595.jpg" /></texture><spectrum name="specularReflectance" value="0.9000000 0.9000000 0.9000000" /></bsdf>
