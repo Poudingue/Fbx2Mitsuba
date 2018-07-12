@@ -4,19 +4,17 @@ import math
 import copy
 from pathlib import Path
 import xml.etree.cElementTree as etree
-import xml.dom.minidom as dom
 
-verbose = True
-twosided= True
+verbose = False
+twosided= False
 
 def convert(filename):
 	print("asexml2mitsubaxml lauched")
 	# For complementary infos not in the ase file
-	inputfbx = open(filename+".fbx", "r")
 
-	inputfile = open(filename+"_ase.xml", "r")
-	inputdata = dom.parse(inputfile)
-	inputfile.close()
+	# inputfile = open(filename+"_ase.xml", "r")
+	inputdata = etree.parse(filename+"_ase.xml")
+	# inputfile.close()
 
 	root = etree.Element("scene")
 
@@ -28,12 +26,12 @@ def convert(filename):
 
 	# Set up cameras
 
-	for camera in inputdata.getElementsByTagName("CAMERAOBJECT") :
-		# Go into camera
-		camera_name = camera.getAttribute("NODE_NAME")
+	# Go into camera
+	for camera in inputdata.findall("CAMERAOBJECT") :
+		camera_name = camera.get("NODE_NAME")
 		if verbose :
 			print("Camera "+camera_name)
-		camera_type = camera.getAttribute("CAMERA_TYPE")
+		camera_type = camera.get("CAMERA_TYPE")
 		curr_camera = etree.SubElement(root, "sensor")
 		curr_camera.set("type", "perspective") # by default it's gonna be perspective.
 
@@ -65,12 +63,12 @@ def convert(filename):
 			lookat_camera = etree.SubElement(transf_camera, "lookat")
 			origin = "INVALID ORIGIN"
 			target = "INVALID TARGET"
-			for node in camera.getElementsByTagName("NODE_TM"):
-				node_name = node.getAttribute("NODE_NAME")
+			for node in camera.findall("NODE_TM"):
+				node_name = node.get("NODE_NAME")
 				if node_name==camera_name :
-					origin = node.getAttribute("TM_POS")
+					origin = node.get("TM_POS")
 				elif node_name==camera_name+".Target" :
-					target = node.getAttribute("TM_POS")
+					target = node.get("TM_POS")
 				else :
 					print("UNKNOWN CAMERA NODE :\ncamera : "+camera_name+"\nnode : "+node_name)
 			if origin == "INVALID ORIGIN" or target == "INVALID TARGET":
@@ -93,7 +91,7 @@ def convert(filename):
 			print("Camera type unknown : "+camera_type)
 		# The real angle can be accessed in the fbx file for some elements, it allowed me to chose the right multiplier.
 		# TODO take the fov directly from the fbx
-		fov = 57.29677533 * float(camera.getElementsByTagName("CAMERA_SETTINGS")[0].getAttribute("CAMERA_FOV"))
+		fov = 57.29677533 * float(camera.find("CAMERA_SETTINGS").get("CAMERA_FOV"))
 		camera_fov = etree.SubElement(curr_camera, "float")
 		camera_fov.set("name", "fov")
 		camera_fov.set("value", str(fov))
@@ -103,16 +101,15 @@ def convert(filename):
 		camera_fov_axis.set("value", "x")
 
 	# Set up lights
-	for light in inputdata.getElementsByTagName("LIGHTOBJECT") :
-		light_name = light.getAttribute("NODE_NAME")
+	for light in inputdata.findall("LIGHTOBJECT") :
+		light_name = light.get("NODE_NAME")
 		if verbose :
 			print("Light "+light_name)
+
 		# Search for the light reference in the fbx file
 		# It means going through the fbx file twice for each light
-		# But the xml version would be even harder to go through for this specific task.
 
-		# TODO Go through the fbx once and take all the useful info
-
+		# TODO TODO TODO Go through the fbx once and take all the useful info
 		light_ref = ""
 		nexturn = False
 		if verbose :
@@ -151,17 +148,17 @@ def convert(filename):
 				searchBegan = True
 
 		# There should be only one node for pointlight. Maybe not for more complex light, TODO
-		node = light.getElementsByTagName("NODE_TM")[0]
-		light_pos = node.getAttribute("TM_POS").split()
-		light_parameters = light.getElementsByTagName("LIGHT_SETTINGS")[0]
-		light_color = light_parameters.getAttribute("LIGHT_COLOR").split()
+		node = light.find("NODE_TM")
+		light_pos = node.get("TM_POS").split()
+		light_parameters = light.find("LIGHT_SETTINGS")
+		light_color = light_parameters.get("LIGHT_COLOR").split()
 		# With arbitrary tries, it seems that multiplying by 10000 the light intensity is the way to go
 		colors = ""
 		for component in light_color :
 			# Divide the radiance by the apparent surface of the light to have the same intensity as a zero-sized pointlight
 			colors += " " + str(float(component)*10000/((math.pi * float(sphere_radius)**2) if light_is_a_sphere else 1))
 
-		light_intensity = light_parameters.getAttribute("LIGHT_INTENS")
+		light_intensity = light_parameters.get("LIGHT_INTENS")
 
 		if light_is_a_sphere :
 			light_shape = etree.SubElement(root, "shape")
@@ -189,17 +186,17 @@ def convert(filename):
 
 	# Environnement lighting -> We take the skybox from the 3dsmax scene
 	# There should be only one in the file
-	envmap = inputdata.getElementsByTagName("SCENE_ENVMAP")
-	if envmap==[] :
+	envmap = inputdata.find("SCENE_ENVMAP")
+	if envmap==None :
 		print("No envmap")
 	else :
-		bitmap_location = envmap[0].getAttribute("BITMAP")
+		bitmap_location = envmap.get("BITMAP")
 		if bitmap_location=="":
 			print("Only images are supported for envmap")
 		else:
 			envmap_scene = etree.SubElement(root, "emitter")
 			envmap_scene.set("type","envmap")
-			envmap_scene.set("id", envmap[0].getAttribute("MAP_NAME"))
+			envmap_scene.set("id", envmap[0].get("MAP_NAME"))
 
 			envmap_scene_texture = etree.SubElement(envmap_scene, "string")
 			envmap_scene_texture.set("name","filename")
@@ -221,8 +218,8 @@ def convert(filename):
 
 
 	# import .ply exported by plybuilder.py
-	for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
-		name =  geomobject.getAttribute("NODE_NAME")
+	for geomobject in inputdata.findall("GEOMOBJECT") :
+		name =  geomobject.get("NODE_NAME")
 		if verbose :
 			print("Object "+name)
 		i=0
@@ -231,7 +228,7 @@ def convert(filename):
 			shape.set("type", "ply")
 			importshape = etree.SubElement(shape, "string")
 			importshape.set("name", "filename")
-			importshape.set("value", "meshes/"+name+"_"+str(i)+".ply")
+			importshape.set("value", "meshes/"+name.replace("í","i")+"_"+str(i)+".ply")
 			material_file_name = "materials/"+name+"_material_"+str(i)+".xml"
 			if Path(material_file_name).is_file() :
 				"""
@@ -250,6 +247,8 @@ def convert(filename):
 					print("Found substitute for "+material_file_name+".")
 				material_file = open("materials/"+name+"_material_0.xml", "r")
 				material_str  = material_file.read()
+				if twosided :
+					material_str = "<bsdf type=\"twosided\">"+material_str+"</bsdf>"
 				material_tree = etree.fromstring(material_str)
 				material_file.close()
 				shape.append(material_tree)
@@ -261,11 +260,13 @@ def convert(filename):
 			i+=1
 
 	tree = etree.ElementTree(root)
-	tree.write(filename+".xml")
-
+	print("Writing to file…")
+	tree.write(filename+".xml", encoding="utf8")
+	print("Finished !")
+"""
 	xmlstr = dom.parse(filename+".xml")
 
 	outputfile = open(filename+".xml", "w")
 	outputfile.write(xmlstr.toprettyxml())
 
-	# time.sleep(1)
+"""

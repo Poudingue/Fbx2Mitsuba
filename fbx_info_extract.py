@@ -7,9 +7,7 @@ verbose = True
 
 def fbx_extract(filename):
 	print("fbx_info_extract launched")
-
-	fbx2xml.transform(filename)
-
+	
 	inputfile = open(filename+"_fbx.xml", encoding="utf8")
 	inputdata = dom.parse(inputfile)
 	inputfile.close()
@@ -39,7 +37,7 @@ def fbx_extract(filename):
 			object1type, object1name = object1.split("::")
 		object2type, object2name = object2.split("::")
 
-		# Not sure whrat «something» is supposed to be yet.class
+		# Not sure what «something» is supposed to be yet.
 		# But when it's OO, there are 3 arguments, 4 else.
 		if ids[0] == "OO":
 			complementary = "None"

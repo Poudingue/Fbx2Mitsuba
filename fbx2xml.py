@@ -64,7 +64,6 @@ def transform(filename) :
 
 	tree = etree.ElementTree(root)
 	tree.write(filename+"_fbx.xml", encoding="utf8")
-	print("fbx2xml ended")
 
 	"""
 	xmlstr = dom.parse(filename+"_fbx.xml")

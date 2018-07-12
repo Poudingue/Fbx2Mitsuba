@@ -1,16 +1,15 @@
 import os
 import time
 import xml.etree.cElementTree as etree
-import xml.dom.minidom as dom
 
 verbose = True
 
 def convert(filename):
 	print("plybuilder launched")
-	inputfile = open(filename+"_ase.xml", encoding="utf8")
+	inputfile = open(filename+"_ase.xml")
 	print("parsing "+filename+"_ase.xml…")
 	# TODO Manage HUGE xml files. We only need MATERIAL_LIST and GEOMOBJECT for plybuilder
-	inputdata = dom.parse(inputfile)
+	inputdata = etree.parse(inputfile)
 	print("file parsed")
 
 	if not os.path.exists("meshes") :
@@ -18,18 +17,19 @@ def convert(filename):
 	if not os.path.exists("materials") :
 		os.makedirs("materials")
 
-	materials = inputdata.getElementsByTagName("MATERIAL_LIST")[0].getElementsByTagName("MATERIAL")
+	materials = inputdata.find("MATERIAL_LIST").findall("MATERIAL")
 
-	for geomobject in inputdata.getElementsByTagName("GEOMOBJECT") :
-		name = geomobject.getAttribute("NODE_NAME")
-		mesh = geomobject.getElementsByTagName("MESH")[0]
+	# Go through all geometry in the scene
+	for geomobject in inputdata.findall("GEOMOBJECT") :
+		name = geomobject.get("NODE_NAME")
+		mesh = geomobject.find("MESH")
 
 		# All vertices needed. To have the right per-vertex normals, we'll need 3 times more in the final file
-		mesh_vertices_list = mesh.getElementsByTagName("MESH_VERTEX_LIST")[0].getElementsByTagName("MESH_VERTEX")
+		mesh_vertices_list = mesh.find("MESH_VERTEX_LIST").findall("MESH_VERTEX")
 		# Contains triplets, but also material references.
-		mesh_faces_list    = mesh.getElementsByTagName("MESH_FACE_LIST")[0].getElementsByTagName("MESH_FACE")
+		mesh_faces_list    = mesh.find("MESH_FACE_LIST").findall("MESH_FACE")
 		# Contains triplets of vertex ids, and vertex normals.
-		mesh_normals_list  = mesh.getElementsByTagName("MESH_NORMALS")[0].getElementsByTagName("MESH_FACENORMAL")
+		mesh_normals_list  = mesh.find("MESH_NORMALS").findall("MESH_FACENORMAL")
 		# Get the uv from the fbx file
 		input_uv = open("fbxinfos/Geometry_"+ name +"_uv.txt", "r")
 		mesh_uv_list = input_uv.readline().split(",")
@@ -38,10 +38,12 @@ def convert(filename):
 		list_materials=[]
 		out_materials = etree.Element("materials")
 
-		curr_material_id = geomobject.getAttribute("MATERIAL_REF")
-		if curr_material_id=="" :
-			print("Object "+name+" has no material assigned to it. Using wireframe color")
-			curr_diffuse = geomobject.getAttribute("WIREFRAME_COLOR")
+		curr_material_id = geomobject.get("MATERIAL_REF")
+		if curr_material_id==None :
+			# print("Object "+name+" has no material assigned to it. Using wireframe color")
+			# curr_diffuse = geomobject.get("WIREFRAME_COLOR")
+			print("Object "+name+" has no material assigned to it. Using RED diffuse.")
+			curr_diffuse = "1 0 0"
 			curr_export_material = etree.SubElement(out_materials, "bsdf")
 			# Default material : phong. Blinn not supported by Mitsuba.
 			curr_export_material.set("type", "diffuse")
@@ -54,39 +56,39 @@ def convert(filename):
 		else:
 			# Get the correct material
 			curr_material = materials[int(curr_material_id)]
-			if curr_material.getAttribute("id")!=curr_material_id :
+			if curr_material.get("id")!=curr_material_id :
 				print("Materials not ordered by id for object "+name)
-			submaterials = curr_material.getElementsByTagName("SUBMATERIAL")
+			submaterials = curr_material.findall("SUBMATERIAL")
 
 		one_material_only = submaterials==[]
 
 
 		# Get nb of different submaterials in a single object : Each material will have its own «sub-object»
 		for mesh_face in mesh_faces_list :
-			mat_id = int(mesh_face.getAttribute("MESH_MTLID"))
+			mat_id = int(mesh_face.get("MESH_MTLID"))
 			if mat_id not in list_materials :
 				list_materials.append(mat_id)
 
-		if one_material_only and curr_material_id!="" :
+		if one_material_only and curr_material_id!=None :
 			submaterials.append(materials[int(curr_material_id)])
 
 		for material in submaterials:
-			mat_id = material.getAttribute("id")
+			mat_id = material.get("id")
 			curr_export_material = etree.SubElement(out_materials, "bsdf")
 			# Default material : phong. Blinn not supported by Mitsuba.
 			curr_export_material.set("type", "phong")
 			# curr_export_material.set("id", name+"_material_"+mat_id)
-			diffuse_texture = material.getElementsByTagName("MAP_DIFFUSE")
+			diffuse_texture = material.findall("MAP_DIFFUSE")
 			texture_present = diffuse_texture!=[]
 			if texture_present :
-				bitmap_diffuse_texture = diffuse_texture[0].getAttribute("BITMAP")
-			curr_diffuse = material.getAttribute("MATERIAL_DIFFUSE")
-			specular_level = float(material.getAttribute("MATERIAL_SHINESTRENGTH"))
-			specular_color = material.getAttribute("MATERIAL_SPECULAR").split()
+				bitmap_diffuse_texture = diffuse_texture[0].get("BITMAP")
+			curr_diffuse = material.get("MATERIAL_DIFFUSE")
+			specular_level = float(material.get("MATERIAL_SHINESTRENGTH"))
+			specular_color = material.get("MATERIAL_SPECULAR").split()
 			for component in specular_color :
 				component = str(specular_level*float(component))
 			# Encoded in the 0-1 range, have to convert to 0-100
-			glossiness = 100*float(material.getAttribute("MATERIAL_SHINE"))
+			glossiness = 100*float(material.get("MATERIAL_SHINE"))
 			exponent = etree.SubElement(curr_export_material, "float")
 			exponent.set("name", "exponent")
 			exponent.set("value", str(glossiness))
@@ -129,11 +131,11 @@ def convert(filename):
 		for i in range(len(mesh_faces_list)) :
 			mesh_face   = mesh_faces_list[i]
 			mesh_normal = mesh_normals_list[i]
-			if not (mesh_face.getAttribute("id") == mesh_normal.getAttribute("id") and str(i) == mesh_normal.getAttribute("id")):
+			if not (mesh_face.get("id") == mesh_normal.get("id") and str(i) == mesh_normal.get("id")):
 				print("faces not in id order in object "+name)
 
-			vertices = mesh_normal.getElementsByTagName("MESH_VERTEXNORMAL")
-			mtlid = int(mesh_face.getAttribute("MESH_MTLID"))
+			vertices = mesh_normal.findall("MESH_VERTEXNORMAL")
+			mtlid = int(mesh_face.get("MESH_MTLID"))
 			mtl_place = material_place[mtlid]
 
 			if len(vertices)!=3 :
@@ -141,12 +143,12 @@ def convert(filename):
 			curr_output_vertices=output_vertices_list[mtl_place]
 
 			for vertex in vertices :
-				idvertex = int(vertex.getAttribute("id"))
-				if str(idvertex) != mesh_vertices_list[idvertex].getAttribute("id"):
+				idvertex = int(vertex.get("id"))
+				if str(idvertex) != mesh_vertices_list[idvertex].get("id"):
 					print("MESH_VERTICES not in the order of id")
 					exit(0)
-				vertexcoords = mesh_vertices_list[idvertex].getAttribute("value")
-				vertexnormals = vertex.getAttribute("value")
+				vertexcoords = mesh_vertices_list[idvertex].get("value")
+				vertexnormals = vertex.get("value")
 				# TODO voir comment accéder à l'uvmap proprement
 				if(idforuv>=len(mesh_uv_list)-1):
 					# if verbose :
@@ -187,7 +189,6 @@ def convert(filename):
 			for vertex in output_vertices_list[material_place[i]] :
 				output.write(vertex+"\n")
 
-			for face in output_faces_list[material_place[i]] :
+			for face in output_faces_list[material_place[i]][:-1] :
 				output.write(face+"\n")
-		output.write("\n")
-		output.close()
+			output.write(output_faces_list[material_place[i]][-1])

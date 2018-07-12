@@ -11,23 +11,21 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 
 ## What will be converted
 - Positions and fov of cameras (no tilt yet)
-- Positions and intensity of lights (sphere lightsources conversion for soft shadows work)
+- Positions and intensity of lights (Temporarily no points, only spheres)
 - Meshes (separated by material for a single 3d object)
-- Materials : Only Phong is correct for now
-- Textures : No uv mapping for now
+- Materials : Only Phong is correct for now. Other ones will appear as red diffuse.
+- Textures : basic uv mapping, may or may not work.
 - Envmap : will count as a lightsource contrary to 3dsmax, so expect different lighting for the scene.
 
-## Potential problems
-
-- Limited to small scale scenes for now (because of intermediate xml files which are hard to handle when they get bigger)
 
 ## How it works
 
 - ase and fbx files are converted to intermediate xml
-- meshes and materials from the converted ase file. Vertex normal depend on the face using it, so I duplicated vertex to store different normals for each face.
-- If an object has multiple materials applied to it, it will create a separate mesh for each one.
-- Materials are stored in a separate folder
+- if an object has multiple materials applied to it, it will create a separate mesh for each one.
+- meshes are stored in their respective folder
+- materials are stored in a separate folder
 - The scene is generated from the intermediate files, as well as the meshes generated.
+- Useless intermediate files are deleted
 
 ## Copyright and stuff
 

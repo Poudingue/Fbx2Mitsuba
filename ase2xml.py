@@ -108,9 +108,9 @@ def ase2xmlconvert(filename):
 		print("Writing file")
 	tree = etree.ElementTree(root)
 	tree.write(filename+"_ase.xml", encoding="utf8")
-
-	inputfile = open("scene_ase.xml", "r", encoding="utf8")
-	outputfile = open("scene_ase_out.xml", "w", encoding="utf8")
+"""
+	inputfile = open(filename+"_ase.xml", "r", encoding="utf8")
+	outputfile = open(filename+"_ase_out.xml", "w", encoding="utf8")
 
 	# Dirty, useful to make a more manageable file
 
@@ -123,6 +123,7 @@ def ase2xmlconvert(filename):
 	print("Done")
 	inputfile.close()
 	outputfile.close()
+"""
 """
 	# Not necessary, just to make a human-readable xml
 	if verbose :
