@@ -1,26 +1,18 @@
-import time
 import re
 import math
-import copy
 from pathlib import Path
 import xml.etree.cElementTree as etree
 
-verbose = False
-twosided= False
-
-def convert(filename):
-	print("asexml2mitsubaxml lauched")
+def build(filename, asetree, verbose=False, debug=False, twosided=True):
+	if verbose : print("asexml2mitsubaxml lauched")
 	# For complementary infos not in the ase file
 
-	# inputfile = open(filename+"_ase.xml", "r")
-	inputdata = etree.parse(filename+"_ase.xml")
-	# inputfile.close()
+	inputdata = asetree
 
 	root = etree.Element("scene")
-
 	root.set("version", "0.5.0")
 
-	# Set up the integrator. For now pathtracing.
+	# Set up the integrator. I chose pathtracing by default.
 	integrator = etree.SubElement(root, "integrator")
 	integrator.set("type", "path")
 
@@ -29,8 +21,7 @@ def convert(filename):
 	# Go into camera
 	for camera in inputdata.findall("CAMERAOBJECT") :
 		camera_name = camera.get("NODE_NAME")
-		if verbose :
-			print("Camera "+camera_name)
+		if verbose : print("Camera "+camera_name)
 		camera_type = camera.get("CAMERA_TYPE")
 		curr_camera = etree.SubElement(root, "sensor")
 		curr_camera.set("type", "perspective") # by default it's gonna be perspective.
@@ -103,8 +94,7 @@ def convert(filename):
 	# Set up lights
 	for light in inputdata.findall("LIGHTOBJECT") :
 		light_name = light.get("NODE_NAME")
-		if verbose :
-			print("Light "+light_name)
+		if verbose : print("Light "+light_name)
 
 		# Search for the light reference in the fbx file
 		# It means going through the fbx file twice for each light
@@ -112,8 +102,7 @@ def convert(filename):
 		# TODO TODO TODO Go through the fbx once and take all the useful info
 		light_ref = ""
 		nexturn = False
-		if verbose :
-			print("Searching light "+light_name+" in fbx file")
+		if verbose : print("Searching light "+light_name+" in fbx file")
 		for line in open(filename+".fbx", "r") :
 			if nexturn :
 				reg_lightref = re.match("\tC: \"OO\",(\d*),\d*\n", line)
@@ -220,21 +209,16 @@ def convert(filename):
 	# import .ply exported by plybuilder.py
 	for geomobject in inputdata.findall("GEOMOBJECT") :
 		name =  geomobject.get("NODE_NAME")
-		if verbose :
-			print("Object "+name)
+		if verbose : print("Object "+name)
 		i=0
 		while Path("meshes/"+name+"_"+str(i)+".ply").is_file():
 			shape = etree.SubElement(root, "shape")
 			shape.set("type", "ply")
 			importshape = etree.SubElement(shape, "string")
 			importshape.set("name", "filename")
-			importshape.set("value", "meshes/"+name.replace("í","i")+"_"+str(i)+".ply")
+			# importshape.set("value", "meshes/"+name.replace("í","i")+"_"+str(i)+".ply")
 			material_file_name = "materials/"+name+"_material_"+str(i)+".xml"
 			if Path(material_file_name).is_file() :
-				"""
-				if verbose :
-					print("file "+material_file_name+" found")
-				"""
 				material_file = open(material_file_name, "r")
 				material_str  = material_file.readline()
 				if twosided :
@@ -243,8 +227,7 @@ def convert(filename):
 				material_file.close()
 				shape.append(material_tree)
 			elif Path("materials/"+name+"_material_0.xml").is_file() :
-				if verbose :
-					print("Found substitute for "+material_file_name+".")
+				if verbose : print("Found substitute for "+material_file_name+".")
 				material_file = open("materials/"+name+"_material_0.xml", "r")
 				material_str  = material_file.read()
 				if twosided :
@@ -260,13 +243,5 @@ def convert(filename):
 			i+=1
 
 	tree = etree.ElementTree(root)
-	print("Writing to file…")
+	if verbose : print("Writing to file…")
 	tree.write(filename+".xml", encoding="utf8")
-	print("Finished !")
-"""
-	xmlstr = dom.parse(filename+".xml")
-
-	outputfile = open(filename+".xml", "w")
-	outputfile.write(xmlstr.toprettyxml())
-
-"""

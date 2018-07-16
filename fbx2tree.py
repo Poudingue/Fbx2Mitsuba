@@ -1,20 +1,14 @@
-import sys
-import time
 import re
 import xml.etree.cElementTree as etree
-import xml.dom.minidom as dom
 
-def transform(filename) :
-	print("fbx2xml launched")
-
-	inputfile = open(filename+".fbx", encoding="utf8")
-
+def transform(filename, verbose=False, debug=False) :
+	if verbose : print("fbx2tree launched")
 	root = etree.Element("root")
 	parents = []
 	current_elem = root
-
+	inputfile = open(filename+".fbx", encoding="utf8")
 	# Skip the first line
-	inputfile.readline()
+	# inputfile.readline()
 
 	for line in inputfile :
 		line = line.replace("\"","")
@@ -55,20 +49,15 @@ def transform(filename) :
 			print("unknown : "+line)
 			stuff = etree.SubElement(current_elem, "stuff")
 			stuff.text = line
-
+	inputfile.close()
 
 	if parents != [] :
 		print("PARENTS LIST NOT EMPTY")
 		print(parents)
 		exit(1)
-
 	tree = etree.ElementTree(root)
-	tree.write(filename+"_fbx.xml", encoding="utf8")
 
-	"""
-	xmlstr = dom.parse(filename+"_fbx.xml")
+	if debug :
+		tree.write(filename+"_fbx.xml", encoding="utf8")
 
-	# print(xmlstr.toprettyxml())
-	outputfile = open(filename+"_fbx.xml", "w", encoding="utf8")
-	outputfile.write(xmlstr.toprettyxml())
-	"""
+	return tree

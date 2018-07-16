@@ -4,7 +4,7 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 
 ## Howto
 
-- export the 3dsmax scene to ase and fbx (for now with the file name being «scene»)
+- export the 3dsmax scene to scene.ase and scene.fbx (ascii fbx, not binary)
 - install python if you don't have it already
 - use converter.py
 - the mitsuba output file is «scene.xml»

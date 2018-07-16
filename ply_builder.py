@@ -1,26 +1,17 @@
 import os
-import time
 import xml.etree.cElementTree as etree
 
-verbose = True
-
-def convert(filename):
-	print("plybuilder launched")
-	inputfile = open(filename+"_ase.xml")
-	print("parsing "+filename+"_ase.xml…")
-	# TODO Manage HUGE xml files. We only need MATERIAL_LIST and GEOMOBJECT for plybuilder
-	inputdata = etree.parse(inputfile)
-	print("file parsed")
-
+def build(asetree, verbose=False, debug=False):
+	if verbose : print("plybuilder launched")
 	if not os.path.exists("meshes") :
 		os.makedirs("meshes")
 	if not os.path.exists("materials") :
 		os.makedirs("materials")
 
-	materials = inputdata.find("MATERIAL_LIST").findall("MATERIAL")
+	materials = asetree.find("MATERIAL_LIST").findall("MATERIAL")
 
 	# Go through all geometry in the scene
-	for geomobject in inputdata.findall("GEOMOBJECT") :
+	for geomobject in asetree.findall("GEOMOBJECT") :
 		name = geomobject.get("NODE_NAME")
 		mesh = geomobject.find("MESH")
 
@@ -138,21 +129,16 @@ def convert(filename):
 			mtlid = int(mesh_face.get("MESH_MTLID"))
 			mtl_place = material_place[mtlid]
 
-			if len(vertices)!=3 :
-				print("not a 3-sided polygon : "+str(len(vertices)))
+			if len(vertices)!=3 : print("not a 3-sided polygon : "+str(len(vertices)))
 			curr_output_vertices=output_vertices_list[mtl_place]
 
 			for vertex in vertices :
 				idvertex = int(vertex.get("id"))
-				if str(idvertex) != mesh_vertices_list[idvertex].get("id"):
-					print("MESH_VERTICES not in the order of id")
-					exit(0)
+				if str(idvertex) != mesh_vertices_list[idvertex].get("id") : print("MESH_VERTICES not in the order of id")
 				vertexcoords = mesh_vertices_list[idvertex].get("value")
 				vertexnormals = vertex.get("value")
 				# TODO voir comment accéder à l'uvmap proprement
 				if(idforuv>=len(mesh_uv_list)-1):
-					# if verbose :
-					# 	print("Invalid UV mapping for object "+name+" using default value of 0 0")
 					uvmap = "0 0"
 				else:
 					uvmap = mesh_uv_list[idforuv]
@@ -163,8 +149,7 @@ def convert(filename):
 			output_vertices = output_vertices_list[i]
 			output_faces = output_faces_list[i]
 			nb_vertices = len(output_vertices)
-			if nb_vertices%3!=0:
-				print("Number of vertices not a multiple of 3")
+			if nb_vertices%3 != 0 : print("Number of vertices not a multiple of 3")
 			for j in range(int(nb_vertices/3)) :
 				output_faces.append("3 "+str(3*j)+" "+str(3*j+1)+" "+str(3*j+2))
 
