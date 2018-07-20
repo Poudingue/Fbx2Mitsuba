@@ -1,10 +1,11 @@
 import re
+import tools
 import xml.etree.cElementTree as etree
 
-def transform(filename, verbose=False, debug=False):
-	if verbose : print("ase2tree launched")
+def transform(filename, verbose = False, debug = False):
+	if verbose : print("ase2tree launched…")
 	inputfile = open(filename+".ASE", "r")
-
+	if verbose : print("file openened")
 	root = etree.Element("root")
 	parents = []
 	current_elem = root
@@ -88,8 +89,15 @@ def transform(filename, verbose=False, debug=False):
 
 	if parents != [] :
 		print("PARENTS LIST NOT EMPTY")
+
+	if verbose : print ("Building tree")
 	tree = etree.ElementTree(root)
+
 	if debug :
-		print("Writing file")
-		tree.write(filename+"_ase.xml", encoding="utf8")
+		if verbose : print("writing file")
+		with open(filename+"_ase.xml", "w", encoding="utf8") as outputfile :
+			if verbose : print("prettifying… (Can take a while for big files)")
+			stringout = tools.prettifyXml(etree.tostring(root).decode())
+			if verbose : print("writing…")
+			outputfile.write(stringout)
 	return tree

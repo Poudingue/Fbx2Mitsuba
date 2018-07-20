@@ -1,13 +1,13 @@
 import os
 import xml.etree.cElementTree as etree
 
-def extract(fbxtree, verbose=False, debug=False):
+def extract(fbxtree, verbose = False, debug = False):
 	print("fbx_extract launched")
 	inputdata = fbxtree
 	big_dictionnary = {}
-	connections_list = inputdata.find("Connections")
-	comments = connections_list.findall("comment")
-	connections = connections_list.findall("C")
+	comments_and_connections_list = inputdata.find("Connections")
+	comments = comments_and_connections_list.findall("comment")
+	connections = comments_and_connections_list.findall("C")
 
 	if len(comments)!=len(connections) :
 		print("comments and connections are not of the same length")
@@ -50,8 +50,12 @@ def extract(fbxtree, verbose=False, debug=False):
 			print(object2name +" already in dict with id : "+ id2 +" vs "+id_in_dict2)
 		else : big_dictionnary[object2name]=id2
 
+# Not sure this is useful. Maybe split different tasks 	between files ?
 	objects_list = inputdata.find("Objects")
 	geometry_list = objects_list.findall("Geometry")
+	nodes_list = objects_list.findall("NodeAttribute")
+	camera_list, camera_target_list, light_list = [], [], []
+
 	geometry_temp_dict = {}
 	for geometry in geometry_list :
 
@@ -71,14 +75,13 @@ def extract(fbxtree, verbose=False, debug=False):
 		outputdata = GeometryInfos[stuff]
 		# Replace uv+uvindex by simple uv list
 		getLayerUv = outputdata.find("LayerElementUV")
+		uvout = ""
 		if getLayerUv == None :
 			if verbose : print("Empty layeruv in "+stuff)
-			uvout=""
 		else :
 			layerUv = getLayerUv
 			uvs = layerUv.find("UV").find("a").text.split(",")
 			uvsindex = layerUv.find("UVIndex").find("a").text.split(",")
-			uvout=""
 			for i in range(len(uvsindex)) :
 				curr_index = int(uvsindex[i])
 				uvout+=(uvs[2*curr_index]+" "+uvs[2*curr_index+1]+",")

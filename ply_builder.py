@@ -1,7 +1,7 @@
 import os
 import xml.etree.cElementTree as etree
 
-def build(asetree, verbose=False, debug=False):
+def build(asetree, verbose = False, debug = False):
 	if verbose : print("plybuilder launched")
 	if not os.path.exists("meshes") :
 		os.makedirs("meshes")
@@ -30,10 +30,10 @@ def build(asetree, verbose=False, debug=False):
 		out_materials = etree.Element("materials")
 
 		curr_material_id = geomobject.get("MATERIAL_REF")
-		if curr_material_id==None :
-			# print("Object "+name+" has no material assigned to it. Using wireframe color")
+		if curr_material_id == None :
+			# if verbose : print("Object "+name+" has no material assigned to it. Using wireframe color")
 			# curr_diffuse = geomobject.get("WIREFRAME_COLOR")
-			print("Object "+name+" has no material assigned to it. Using RED diffuse.")
+			if verbose : print("Object "+name+" has no material assigned to it. Using RED diffuse.")
 			curr_diffuse = "1 0 0"
 			curr_export_material = etree.SubElement(out_materials, "bsdf")
 			# Default material : phong. Blinn not supported by Mitsuba.
@@ -49,6 +49,7 @@ def build(asetree, verbose=False, debug=False):
 			curr_material = materials[int(curr_material_id)]
 			if curr_material.get("id")!=curr_material_id :
 				print("Materials not ordered by id for object "+name)
+				exit(0)
 			submaterials = curr_material.findall("SUBMATERIAL")
 
 		one_material_only = submaterials==[]
@@ -101,7 +102,7 @@ def build(asetree, verbose=False, debug=False):
 			if one_material_only :
 				id_material=name+"_material_0"
 			materialtree = etree.ElementTree(material)
-			materialtree.write("materials/"+id_material+".xml")
+			materialtree.write("materials/"+str(id_material)+".xml")
 
 		# To store the place where the ids are in the materials_list
 		material_place = [-1]*(1+max(list_materials))# There can be ids higher that the nb of materials. -1 for errors

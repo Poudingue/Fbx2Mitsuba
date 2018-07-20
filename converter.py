@@ -2,6 +2,7 @@ import ase2tree
 import fbx2tree
 import fbx_extracter
 import ply_builder
+import ply_builder_fromfbx
 import mitsuba_builder
 
 import shutil
@@ -17,6 +18,9 @@ debug = args.debug
 filename = "scene"
 asetree = ase2tree.transform(filename, verbose, debug)
 fbxtree = fbx2tree.transform(filename, verbose, debug)
+# Still experimental
+ply_builder_fromfbx.build(fbxtree, verbose, debug)
+
 fbx_extracter.extract(fbxtree, verbose, debug)
 ply_builder.build(asetree, verbose, debug)
 mitsuba_builder.build(filename, asetree, verbose, debug, twosided=True)

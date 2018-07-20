@@ -3,6 +3,7 @@ materials/
 fbxinfos/
 __pycache__/
 *.jpg
+*.png 
 *.exr
 *.max
 *.ASE

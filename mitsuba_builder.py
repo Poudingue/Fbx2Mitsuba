@@ -1,9 +1,10 @@
 import re
 import math
+import tools
 from pathlib import Path
 import xml.etree.cElementTree as etree
 
-def build(filename, asetree, verbose=False, debug=False, twosided=True):
+def build(filename, asetree, verbose=False, debug=False, twosided=True) :
 	if verbose : print("asexml2mitsubaxml lauched")
 	# For complementary infos not in the ase file
 
@@ -120,7 +121,7 @@ def build(filename, asetree, verbose=False, debug=False, twosided=True):
 			print("Light found")
 
 		# Searching in the FBX file for sphere light source
-		light_is_a_sphere = True
+		light_is_a_sphere = False
 		sphere_radius = "10"
 		searchBegan = False
 		for line in open(filename+".fbx", "r") :
@@ -130,8 +131,7 @@ def build(filename, asetree, verbose=False, debug=False, twosided=True):
 				if "FSphereParameters" in line :
 					light_is_a_sphere = True
 				if "FSphereExtParameters|light_radius" in line :
-					radius_extraction = line.split(",")
-					sphere_radius = radius_extraction[len(radius_extraction)-1]#
+					sphere_radius = line.split(",")[-1]
 			reg_lightdef = re.match("\tNodeAttribute: "+light_ref+", \"NodeAttribute::\", \"Light\" {", line)
 			if reg_lightdef!=None:
 				searchBegan = True
@@ -162,7 +162,7 @@ def build(filename, asetree, verbose=False, debug=False, twosided=True):
 		light_in_scene.set("id",light_name)
 
 		light_color_in_scene = etree.SubElement(light_in_scene, "spectrum")
-		light_color_in_scene.set("name", "radiance")
+		light_color_in_scene.set("name", "radiance" if light_is_a_sphere else "intensity")
 		light_color_in_scene.set("value", colors.strip())
 
 		light_transform_in_scene = etree.SubElement(light_shape if light_is_a_sphere else light_in_scene, "transform")
@@ -216,7 +216,7 @@ def build(filename, asetree, verbose=False, debug=False, twosided=True):
 			shape.set("type", "ply")
 			importshape = etree.SubElement(shape, "string")
 			importshape.set("name", "filename")
-			# importshape.set("value", "meshes/"+name.replace("í","i")+"_"+str(i)+".ply")
+			importshape.set("value", "meshes/"+name+"_"+str(i)+".ply")
 			material_file_name = "materials/"+name+"_material_"+str(i)+".xml"
 			if Path(material_file_name).is_file() :
 				material_file = open(material_file_name, "r")
@@ -242,6 +242,10 @@ def build(filename, asetree, verbose=False, debug=False, twosided=True):
 			shape_transf.set("name", "toWorld")
 			i+=1
 
-	tree = etree.ElementTree(root)
 	if verbose : print("Writing to file…")
-	tree.write(filename+".xml", encoding="utf8")
+	with open(filename+".xml", "w", encoding="utf8") as outputfile :
+		if verbose : print("prettifying… (Can take a while for big files)")
+		stringout = tools.prettifyXml(etree.tostring(root).decode())
+		if verbose : print("writing…")
+		outputfile.write(stringout)
+	# tree.write(filename+".xml", encoding="utf8")

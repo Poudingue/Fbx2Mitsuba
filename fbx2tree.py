@@ -1,14 +1,14 @@
 import re
+import tools
 import xml.etree.cElementTree as etree
 
-def transform(filename, verbose=False, debug=False) :
-	if verbose : print("fbx2tree launched")
+def transform(filename, verbose = False, debug = False) :
+	if verbose : print("fbx2tree launched…")
 	root = etree.Element("root")
 	parents = []
 	current_elem = root
 	inputfile = open(filename+".fbx", encoding="utf8")
-	# Skip the first line
-	# inputfile.readline()
+	if verbose : print("file openened")
 
 	for line in inputfile :
 		line = line.replace("\"","")
@@ -20,7 +20,7 @@ def transform(filename, verbose=False, debug=False) :
 		reg_info = re.match("([A-Za-z0-9_]+): *(.*)", line.strip())
 		if "}" in line :
 			current_elem = parents.pop()
-		elif len(line.strip())==0 :
+		elif len(line.strip()) == 0 :
 			pass
 		elif reg_comment!=None :
 			comment = etree.SubElement(current_elem, "comment")
@@ -44,7 +44,7 @@ def transform(filename, verbose=False, debug=False) :
 				else :
 					moretext+=onemoreline
 			elem = etree.SubElement(current_elem, reg_info[1])
-			elem.text = reg_info[2]+moretext
+			elem.text = reg_info[2] + moretext
 		else :
 			print("unknown : "+line)
 			stuff = etree.SubElement(current_elem, "stuff")
@@ -55,9 +55,15 @@ def transform(filename, verbose=False, debug=False) :
 		print("PARENTS LIST NOT EMPTY")
 		print(parents)
 		exit(1)
+
+	if verbose : print ("Building tree")
 	tree = etree.ElementTree(root)
 
 	if debug :
-		tree.write(filename+"_fbx.xml", encoding="utf8")
-
+		if verbose : print("writing file")
+		with open(filename+"_fbx.xml", "w", encoding="utf8") as outputfile :
+			if verbose : print("prettifying… (Can take a while for big files)")
+			stringout = etree.tostring(root).decode()
+			if verbose : print("writing…")
+			outputfile.write(tools.prettifyXml(stringout))
 	return tree
