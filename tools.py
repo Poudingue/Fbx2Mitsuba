@@ -5,7 +5,7 @@ def getProperties(object) :
 	for prop in allProp :
 		allinfo = prop.text.replace(" ","").split(",")
 		for info in allinfo :
-			dict[allinfo[0]] = ",".join(allinfo[1:])
+			dict[allinfo[0]] = allinfo[1:]
 			# if verbose : print(allinfo[0]+" = "+"".join(allinfo[1:]))
 	return dict
 
@@ -32,10 +32,10 @@ def prettifyXml(uglyxml) :
 				out+=("" if intext else curr_indent*"\t")+line+"\n"
 				intext = False
 			elif not line.endswith("/>"):
-				out+=curr_indent*"\t"+line.strip()+"\n"
+				out+=curr_indent*"\t"+line+"\n"
 				curr_indent+=1
 			else :
-				out+=curr_indent*"\t"+line.strip()+"\n"
+				out+=curr_indent*"\t"+line+"\n"
 		else :
 			out = out[:-1] + line#Remove the \n from last line and add the text
 			intext = True

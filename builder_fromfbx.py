@@ -1,6 +1,6 @@
 import os
 import tools
-import ply_builder_fbx
+import shapes_builder_fbx
 import lightsandcameras_builder_fbx
 import xml.etree.ElementTree as etree
 
@@ -12,7 +12,7 @@ def build(filename, fbxtree, verbose = False, debug = False):
 	objects = fbxtree.find("Objects")
 
 	models    = objects.findall("Model")
-	geometry  = objects.findall("Geometry")
+	geometries  = objects.findall("Geometry")
 	materials = objects.findall("Material")
 	nodes     = objects.findall("NodeAttribute") # Include cameras and lights
 
@@ -38,14 +38,8 @@ def build(filename, fbxtree, verbose = False, debug = False):
 	integrator = etree.SubElement(root, "integrator")
 	integrator.set("type", "path")
 
-	# if not os.path.exists("meshes") :
-	# 	os.makedirs("meshes")
-	# ply_builder_fbx.build(geometry, verbose, debug)
-
 	lightsandcameras_builder_fbx.build(root, nodes, models, verbose, debug)
-
-	if len(comments) != len(links) :
-		print("Error in fbx : Not the same number of comments and connections")
+	shapes_builder_fbx.build(root, geometries, models, verbose, debug)
 
 	if verbose : print("Writing to file…")
 	with open(filename+".xml", "w", encoding="utf8") as outputfile :

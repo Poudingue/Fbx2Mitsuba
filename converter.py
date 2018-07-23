@@ -3,7 +3,6 @@ import fbx2tree
 import fbx_extracter
 import ply_builder
 import builder_fromfbx
-import ply_builder_fbx
 import mitsuba_builder
 
 import shutil
