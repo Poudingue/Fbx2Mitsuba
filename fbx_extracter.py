@@ -1,5 +1,5 @@
 import os
-import xml.etree.cElementTree as etree
+import xml.etree.ElementTree as etree
 
 def extract(fbxtree, verbose = False, debug = False):
 	print("fbx_extract launched")
@@ -35,8 +35,8 @@ def extract(fbxtree, verbose = False, debug = False):
 		else :
 			something, id1, id2, complementary = ids
 
-		if object1name=="":
-			object1name=object2name
+		if object1name == "":
+			object1name = object2name
 		if object1name not in ["T", "R", "S"] :
 			object1name = object1type +"_"+ object1name.replace(" ","_")
 			id_in_dict1 = big_dictionnary.get(object1name)

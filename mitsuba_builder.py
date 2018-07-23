@@ -2,7 +2,7 @@ import re
 import math
 import tools
 from pathlib import Path
-import xml.etree.cElementTree as etree
+import xml.etree.ElementTree as etree
 
 def build(filename, asetree, verbose=False, debug=False, twosided=True) :
 	if verbose : print("asexml2mitsubaxml lauched")

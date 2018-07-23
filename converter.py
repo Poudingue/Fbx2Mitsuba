@@ -2,7 +2,8 @@ import ase2tree
 import fbx2tree
 import fbx_extracter
 import ply_builder
-import ply_builder_fromfbx
+import builder_fromfbx
+import ply_builder_fbx
 import mitsuba_builder
 
 import shutil
@@ -15,15 +16,15 @@ args = parser.parse_args()
 verbose = args.verbose
 debug = args.debug
 
-filename = "scene"
+filename = "simplecube"
 asetree = ase2tree.transform(filename, verbose, debug)
 fbxtree = fbx2tree.transform(filename, verbose, debug)
 # Still experimental
-ply_builder_fromfbx.build(fbxtree, verbose, debug)
+builder_fromfbx.build(filename, fbxtree, verbose, debug)
 
-fbx_extracter.extract(fbxtree, verbose, debug)
-ply_builder.build(asetree, verbose, debug)
-mitsuba_builder.build(filename, asetree, verbose, debug, twosided=True)
+# fbx_extracter.extract(fbxtree, verbose, debug)
+# ply_builder.build(asetree, verbose, debug)
+# mitsuba_builder.build(filename, asetree, verbose, debug, twosided=True)
 
 if not debug :
 	shutil.rmtree("fbxinfos")

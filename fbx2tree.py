@@ -1,6 +1,6 @@
 import re
 import tools
-import xml.etree.cElementTree as etree
+import xml.etree.ElementTree as etree
 
 def transform(filename, verbose = False, debug = False) :
 	if verbose : print("fbx2tree launched…")

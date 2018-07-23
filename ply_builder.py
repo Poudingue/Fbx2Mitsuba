@@ -1,5 +1,5 @@
 import os
-import xml.etree.cElementTree as etree
+import xml.etree.ElementTree as etree
 
 def build(asetree, verbose = False, debug = False):
 	if verbose : print("plybuilder launched")
