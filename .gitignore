@@ -11,3 +11,5 @@ __pycache__/
 *.max
 *.xml
 *.mip
+*.imsq
+*.log

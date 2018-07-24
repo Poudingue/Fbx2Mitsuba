@@ -1,5 +1,7 @@
 import os
 import tools
+import textures_builder_fbx
+import materials_builder_fbx
 import shapes_builder_fbx
 import lightsandcameras_builder_fbx
 import xml.etree.ElementTree as etree
@@ -30,6 +32,8 @@ def build(filename, fbxtree, verbose = False, debug = False):
 	# Comments contain infos about links between objects and their type
 	comments = connections_list.findall("comment")
 	links    = connections_list.findall("C")
+	for link in links :
+		link = link.text.split(",")
 
 	root = etree.Element("scene")
 	root.set("version", "0.5.0")
@@ -38,8 +42,10 @@ def build(filename, fbxtree, verbose = False, debug = False):
 	integrator = etree.SubElement(root, "integrator")
 	integrator.set("type", "path")
 
+	textures_builder_fbx.build(root, textures, links, verbose, debug)
+	materials_builder_fbx.build(root, materials, links, verbose, debug)
 	lightsandcameras_builder_fbx.build(root, nodes, models, verbose, debug)
-	shapes_builder_fbx.build(root, geometries, models, verbose, debug)
+	shapes_builder_fbx.build(root, geometries, verbose, debug)
 
 	if verbose : print("Writing to file…")
 	with open(filename+".xml", "w", encoding="utf8") as outputfile :

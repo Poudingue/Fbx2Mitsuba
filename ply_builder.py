@@ -130,7 +130,7 @@ def build(asetree, verbose = False, debug = False):
 			mtlid = int(mesh_face.get("MESH_MTLID"))
 			mtl_place = material_place[mtlid]
 
-			if len(vertices)!=3 : print("not a 3-sided polygon : "+str(len(vertices)))
+			if len(vertices) != 3 : print("not a 3-sided polygon : "+ str(len(vertices)))
 			curr_output_vertices=output_vertices_list[mtl_place]
 
 			for vertex in vertices :

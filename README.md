@@ -1,4 +1,4 @@
-# Max2Mitsuba
+# Fbx2Mitsuba
 
 A converter from 3dsmax scenes to mitsuba renderer scenes.
 
@@ -6,7 +6,7 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 
 - export the 3dsmax scene to scene.ase and scene.fbx (ascii fbx, not binary)
 - install python if you don't have it already
-- use converter.py (command --verbose and --debug available)
+- use converter.py . commands --verbose (-v) and --debug (-d) available)
 - the mitsuba output file is «scene.xml»
 
 ## What will be converted
@@ -18,9 +18,11 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 	- Normal or bumpmapping not yet supported
 	- So called “Raytrace” 3dsmax material may never be supported. Those material are not even supported by 3dsmax raytracing methods.
 	- The “Metal” shader either, because it doesn't correspond to anything standard and is not supported by 3dsmax raytracing methods.
-- Textures : basic uv mapping, may or may not work.
+- Textures :
+	- Doesn't work anymore, will come back with the new version
+	- uv mapping is in the ply file
 - Environnement map will count as a lightsource. This is a major difference compared to “Scanline” or “Metalray” rendering in 3dsmax
-	- (Envmap are temporarily not working)
+	- Envmap are temporarily not working
 
 
 ## How it works
@@ -36,7 +38,6 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 
 - Shorten and simplify code
 - More but smaller python functions ?
-- Make a faster xml prettifier
 - Increase the number of supported materials
 - Use the ASE file less and less, and the FBX more and more, for multiple reasons :
 	- more info, contains everything we need
@@ -47,6 +48,10 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 - More type of lights support
 - Free camera support
 - Texture tiling support
+
+## Currently developping
+
+- Only FBX use, with call to “builder_fromfbx” in converter (experimental, shapes have no world transform, cameras missing…)
 
 ## Copyright and stuff
 

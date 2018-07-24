@@ -27,15 +27,16 @@ def prettifyXml(uglyxml) :
 		if line == "" :
 			pass
 		elif line.startswith("<") and line.endswith(">") :
-			if line.startswith("</"):
+			if line.startswith("</") :
 				curr_indent-=1
 				out+=("" if intext else curr_indent*"\t")+line+"\n"
 				intext = False
-			elif not line.endswith("/>"):
+			elif line.endswith("/>") or line.startswith("<!") :
+				# one-line tag or comment. don't add indentation
 				out+=curr_indent*"\t"+line+"\n"
-				curr_indent+=1
 			else :
 				out+=curr_indent*"\t"+line+"\n"
+				curr_indent+=1
 		else :
 			out = out[:-1] + line#Remove the \n from last line and add the text
 			intext = True

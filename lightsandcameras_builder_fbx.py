@@ -4,8 +4,9 @@ import xml.etree.ElementTree as etree
 def build(root, nodes, models, verbose = False, debug = False) :
 	if verbose : print("lightsandcameras_builder_fbx launched")
 
-# Prepare nodes and models properties for easy access
-
+	comment = etree.Comment("Lights and cameras")
+	root.append(comment)
+	# Prepare nodes and models properties for easy access
 	camera_nodes, light_nodes = [], []
 	for node in nodes :
 		id, type, obj = node.get("value").replace("::","").split(", ")
