@@ -1,3 +1,4 @@
+import math
 import tools
 import xml.etree.ElementTree as etree
 
@@ -29,7 +30,6 @@ def build(root, nodes, models, verbose = False, debug = False) :
 			camera_models.append(properties)
 		elif obj == "Light" :
 			light_models.append(properties)
-
 	# Handle lights
 
 	if len(light_nodes) != len(light_models) :
@@ -41,23 +41,25 @@ def build(root, nodes, models, verbose = False, debug = False) :
 
 		light_pos = light_model["LclTranslation"][-3:]
 
+		if "3dsMax|FSphereExtParameters|light_radius" in light_node :
+			light_is_a_sphere = True
+			sphere_radius = float(light_node["3dsMax|FSphereExtParameters|light_radius"][-1])
+		else :
+			light_is_a_sphere = False
+
 		colors = light_node["Color"][-3:]
-		intensity = float(light_node["Intensity"][-1])
+		# Divide intensity by apparent surface of the sphere if it's not a point
+		intensity = float(light_node["Intensity"][-1])/(2.*math.pi*sphere_radius**2. if light_is_a_sphere else 1)
 		rvb = []
 		for color in colors :
 			rvb.append(str(intensity * float(color)))
-
-		if "3dsMax|FSphereExtParameters|light_radius" in light_node :
-			light_is_a_sphere = True
-			sphere_radius = light_node["3dsMax|FSphereExtParameters|light_radius"][-1]
-		else : light_is_a_sphere = False
 
 		if light_is_a_sphere :
 			light_shape = etree.SubElement(root, "shape")
 			light_shape.set("type", "sphere")
 			light_radius = etree.SubElement(light_shape, "float")
 			light_radius.set("name", "radius")
-			light_radius.set("value", sphere_radius)
+			light_radius.set("value", str(sphere_radius))
 
 		light = etree.SubElement(light_shape if light_is_a_sphere else root, "emitter")
 		light.set("type", "area" if light_is_a_sphere else "point")

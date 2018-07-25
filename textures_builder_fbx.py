@@ -2,18 +2,23 @@ import os
 import tools
 import xml.etree.ElementTree as etree
 
-def build(root, textures, connections, verbose = False, debug = False):
+def build(root, textures, verbose = False, debug = False):
 	if verbose : print("textures_builder_fbx launched")
 	comment = etree.Comment("Textures with ids")
 	root.append(comment)
+
+	textures_id = []
+
 	# Go through all textures in the scene
 	for texture in textures :
 		id, type, obj = texture.get("value").replace("::","").split(",")
-		reference = texture.find("RelativeFilename").text
+		reference = texture.find("FileName").text
 		uoff, voff = texture.find("ModelUVTranslation").text.split(",")
 		uscaling, vscaling = texture.find("ModelUVScaling").text.split(",")
 
 		if any(reference.endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
+
+			textures_id.append(id)
 
 			curr_texture = etree.SubElement(root, "texture")
 			curr_texture.set("type", "bitmap")
