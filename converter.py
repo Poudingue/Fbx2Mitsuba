@@ -1,9 +1,5 @@
-import ase2tree
 import fbx2tree
-import fbx_extracter
-import ply_builder
 import builder_fromfbx
-import mitsuba_builder
 
 import shutil
 import argparse
@@ -23,14 +19,10 @@ if closest and realist :
 	exit(0)
 
 filename = "scene"
-# asetree = ase2tree.transform(filename, verbose, debug)
+
 fbxtree = fbx2tree.transform(filename, verbose, debug)
-# Still experimental
 builder_fromfbx.build(filename, fbxtree, verbose, debug, closest, realist)
 
-# fbx_extracter.extract(fbxtree, verbose, debug)
-# ply_builder.build(asetree, verbose, debug)
-# mitsuba_builder.build(filename, asetree, verbose, debug, twosided=True)
 
 if not debug :
 	shutil.rmtree("fbxinfos")

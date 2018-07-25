@@ -4,58 +4,53 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 
 ## Howto
 
-- export the 3dsmax scene to scene.ase and scene.fbx (ascii fbx, not binary)
+- export the 3dsmax scene to scene.fbx (ascii fbx, not binary)
 - install python if you don't have it already
 - use converter.py . commands --verbose (-v) and --debug (-d) available)
-- the mitsuba output file is «scene.xml»
+- additionnal commands --realist and --closest allow to choose between the most realistic rendering or the more faithful to the original 3dsmax. If you don't know don't put any, it will achieve a “balanced” look
+- the mitsuba output file is “scene.xml”
 
 ## What will be converted
 
-- Positions and fov of cameras (no tilt yet)
+- SOME cameras
 - Positions and intensity of lights (sphere lights correctly taken into account)
 - Meshes (separated by material for a single 3d object)
-- Materials : Only Blinn-Phong is correct for now. Other ones will appear as red diffuse.
+- Materials : Only Phong is correct for now. Other ones may not be correctly rendered
 	- Normal or bumpmapping not yet supported
 	- So called “Raytrace” 3dsmax material may never be supported. Those material are not even supported by 3dsmax raytracing methods.
 	- The “Metal” shader either, because it doesn't correspond to anything standard and is not supported by 3dsmax raytracing methods.
 - Textures :
-	- Doesn't work anymore, will come back with the new version
-	- uv mapping is in the ply file
-- Environnement map will count as a lightsource. This is a major difference compared to “Scanline” or “Metalray” rendering in 3dsmax
-	- Envmap are temporarily not working
+	- Should work for diffuse use.
+	- uvmapping too
+- Envmap seem not to be included in the fbx file, i will try to retrieve this
 
 
 ## How it works
 
-- ASE and FBX files are parsed (and written to xml files if debug is active)
+- FBX file is parsed (and written to xml file if debug is active)
+- lights and cameras are added to the scene
+- every texture is referenced with a unique id
+- every material is referenced with a unique id, and can use textures id
+- every model create a shapegroup, containing all the geometry
 - if an object has multiple materials applied to it, it will create a separate mesh for each one.
+- these meshes can use a material id
 - meshes are stored in their respective folder
-- materials are stored in a separate folder
-- The scene is generated from the intermediate files, as well as the meshes generated.
-- Useless intermediate files are deleted (except if debug mode is activated)
+- everything is written in the “scene.xml” file, except for meshes, staying in their respective folder
 
 ## Roadmap
 
 - Shorten and simplify code
-- More but smaller python functions ?
-- Increase the number of supported materials
-- Use the ASE file less and less, and the FBX more and more, for multiple reasons :
-	- more info, contains everything we need
-	- everything has a unique id (no more problems with multiple objects having the same name)
-	- support for non-ascii utf8 characters (not the ase, and it causes some problems)
-	- Only one file to parse instead of two
-- More parameters than “verbose” and “debug” for conversion
+- Increase the number of supported materials -> very soon
+- More parameters
 - More type of lights support
-- Free camera support
-- Texture tiling support
+- More cameras support
+- Texture tiling support -> very soon
 
 ## Currently developping
 
-- Only FBX use, with call to “builder_fromfbx” in converter (experimental, shapes have no world transform, cameras missing…)
-
 ## Copyright and stuff
 
-Please understand that this is an experimental ongoing project, so the code might be hard to understand, and some unexpected problems might occur.
+Please understand that this is an experimental ongoing project, so the code might be ugly, and some unexpected problems might occur.
 
 Right now, you can use my (unfinished) work, but i'm not responsible if anything goes wrong.
 So, use at your own risks, be responsible, fasten your seatbelts, and drive safely.
