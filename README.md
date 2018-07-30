@@ -15,6 +15,8 @@ A converter from 3dsmax scenes to mitsuba renderer scenes.
 - SOME cameras
 - Positions and intensity of lights (sphere lights correctly taken into account)
 - Meshes (separated by material for a single 3d object)
+	- Meshes placement can be incorrect
+	- Scaling temporarily disabled to avoid problems with powers of 10
 - Materials : Only Phong is correct for now. Other ones may not be correctly rendered
 	- Normal or bumpmapping not yet supported
 	- So called “Raytrace” 3dsmax material may never be supported. Those material are not even supported by 3dsmax raytracing methods.

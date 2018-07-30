@@ -2,7 +2,7 @@ import os
 import tools
 import xml.etree.ElementTree as etree
 
-def build(root, textures, verbose = False, debug = False):
+def build(root, textures, verbose = False, debug = False, portable = False):
 	if verbose : print("textures_builder_fbx launched")
 	comment = etree.Comment("Textures with ids")
 	root.append(comment)
@@ -12,7 +12,7 @@ def build(root, textures, verbose = False, debug = False):
 	# Go through all textures in the scene
 	for texture in textures :
 		id, type, obj = texture.get("value").replace("::","").split(",")
-		reference = texture.find("FileName").text
+		reference = texture.find("RelativeFilename" if portable else "FileName").text
 		uoff, voff = texture.find("ModelUVTranslation").text.split(",")
 		uscaling, vscaling = texture.find("ModelUVScaling").text.split(",")
 

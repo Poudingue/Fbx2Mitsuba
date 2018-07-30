@@ -7,8 +7,8 @@ import shapes_builder_fbx
 import models_builder_fbx
 import xml.etree.ElementTree as etree
 
-def build(filename, fbxtree, verbose = False, debug = False, closest = False, realist = False):
-	if verbose : print("plybuilder launched")
+def build(filename, fbxtree, verbose = False, debug = False, closest = False, realist = False, portable = False):
+	if verbose : print("builder_fromfbx launched")
 	if not os.path.exists("materials") :
 		os.makedirs("materials")
 
@@ -42,7 +42,7 @@ def build(filename, fbxtree, verbose = False, debug = False, closest = False, re
 	integrator.set("type", "path")
 
 	lightsandcameras_builder_fbx.build(root, nodes, models, verbose, debug)
-	textures_id = textures_builder_fbx.build(root, textures, verbose, debug)
+	textures_id = textures_builder_fbx.build(root, textures, verbose, debug, portable)
 	materials_ids = materials_builder_fbx.build(root, materials, textures_id, links_param, verbose, debug, closest)
 	shapes_ids = shapes_builder_fbx.build(root, geometries, materials_ids, links_simple, links_revert, verbose, debug)
 	models_builder_fbx.build(root, models, links_simple, shapes_ids, verbose, debug)

@@ -39,7 +39,7 @@ def build(root, nodes, models, verbose = False, debug = False) :
 	for i in range(len(light_nodes)) :
 		light_node, light_model = light_nodes[i], light_models[i]
 
-		light_pos = light_model["LclTranslation"][-3:]
+		light_pos = light_model["Lcl Translation"][-3:]
 
 		if "3dsMax|FSphereExtParameters|light_radius" in light_node :
 			light_is_a_sphere = True
@@ -47,7 +47,7 @@ def build(root, nodes, models, verbose = False, debug = False) :
 		else :
 			light_is_a_sphere = False
 
-		colors = light_node["Color"][-3:]
+		colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
 		# Divide intensity by apparent surface of the sphere if it's not a point
 		intensity = float(light_node["Intensity"][-1])/(2.*math.pi*sphere_radius**2. if light_is_a_sphere else 1)
 		rvb = []

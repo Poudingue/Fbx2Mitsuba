@@ -26,11 +26,9 @@ def build(root, materials, textures_id, links_param, verbose = False, debug = Fa
 		if shading != "phong" and verbose :
 			print("Unknown material for object "+id+", using phong")
 
-		diffuse_color = " ".join(properties["Diffuse"][-3:]) if "Diffuse" in properties else "1 0 0" #Use red if there is no diffuse
+		diffuse_color = " ".join(properties["Diffuse"][-3:]) if "Diffuse" in properties else (" ".join(properties["DiffuseColor"][-3:]) if "DiffuseColor" in properties else "1 0 0") #Use red if there is no diffuse
 		specular_color = " ".join(properties["Specular"][-3:]) if "Specular" in properties else ""
 		shininess = properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
-		# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
-		roughness = (2./(float(shininess)+2.)) **(.5) if shininess != "" else 0 # Very glossy material if no shininess found
 
 		# I tried using dielectric, but it only made materials with transmittance, so the plastic was the closer i found.
 		curr_material.set("type", "phong" if closest else "roughplastic")
@@ -44,11 +42,11 @@ def build(root, materials, textures_id, links_param, verbose = False, debug = Fa
 
 		if "DiffuseColor" in linked :# Use a texture
 			curr_albedo = etree.SubElement(curr_material, "ref")
-			curr_albedo.set("name", "diffuseReflectance" if closest else "reflectance")
+			curr_albedo.set("name", "diffuseReflectance")
 			curr_albedo.set("id", linked["DiffuseColor"])
 		else :
 			curr_albedo = etree.SubElement(curr_material, "spectrum")
-			curr_albedo.set("name", "diffuseReflectance" if closest else "reflectance")
+			curr_albedo.set("name", "diffuseReflectance")
 			curr_albedo.set("value", diffuse_color)
 
 
@@ -63,7 +61,15 @@ def build(root, materials, textures_id, links_param, verbose = False, debug = Fa
 		curr_spec_refl.set("value", "1 0 0")
 		"""
 
-		curr_exponent = etree.SubElement(curr_material, "float")
-		curr_exponent.set("name", "exponent")
-		curr_exponent.set("value", shininess)
+		if closest :
+			curr_exponent = etree.SubElement(curr_material, "float")
+			curr_exponent.set("name", "exponent")
+			curr_exponent.set("value", shininess)
+		else :
+			# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
+			# But divided by 2, because mitsuba want its roughness in the range 0 - 0.5
+			roughness = (1./(float(shininess)+2.)) **(.5) if shininess != "" else 0 # Very glossy material if no shininess found
+			curr_roughness = etree.SubElement(curr_material, "float")
+			curr_roughness.set("name", "alpha")
+			curr_roughness.set("value", str(roughness))
 	return material_ids

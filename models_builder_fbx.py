@@ -19,8 +19,11 @@ def build(root, models, links_simple, shapes_ids, verbose = False, debug = False
 					properties = tools.getProperties(model)
 
 					prerotation = properties["PreRotation"][-3:] if "PreRotation" in properties else []
-					translation = properties["LclTranslation"][-3:] if "LclTranslation" in properties else []
-					rotation    = properties["LclRotation"][-3:]    if "LclRotation"    in properties else []
+					translation = properties["Lcl Translation"][-3:] if "Lcl Translation" in properties else []
+					translation2= properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else []
+					rotation    = properties["Lcl Rotation"][-3:]    if "Lcl Rotation"    in properties else []
+					rotation2   = properties["GeometricRotation"][-3:]    if "GeometricRotation"    in properties else []
+					scaling     = properties["Lcl Scaling"][-3:]  if "Lcl Scaling" in properties else []
 
 					curr_shape = etree.SubElement(root, "shape")
 					curr_shape.set("type", "instance")
@@ -31,26 +34,47 @@ def build(root, models, links_simple, shapes_ids, verbose = False, debug = False
 
 					# Add infos to xml only if != 0 to make for a lighter and cleaner file
 
-					if prerotation != [] :
-						for i in range(3) :
-							if prerotation[i].replace("-","") != "0" :
-								curr_prerotat = etree.SubElement(curr_trans, "rotate")
-								curr_prerotat.set(dict_index_to_axis[i], "1")
-								curr_prerotat.set("angle", prerotation[i])
-					
 
-					if translation != [] :
-						curr_translat = etree.SubElement(curr_trans, "translate")
-						for i in range(3) :
-							if translation[i].replace("-","") != "0" :
-								curr_translat.set(dict_index_to_axis[i], translation[i])
+					# TODO handle e -> ten to the power of, in order to have the correct numbers
+					# if rotation2 != [] :
+					# 	for i in range(3) :
+					# 		if rotation2[i].replace("-","") != "0" and not "e" in rotation2[i] :
+					# 			curr_rotat = etree.SubElement(curr_trans, "rotate")
+					# 			curr_rotat.set(dict_index_to_axis[i], "1")
+					# 			curr_rotat.set("angle", rotation2[i])
+
+					# For some reason, the prerotation must come AFTER the rotation for the scene to be correct
 
 					if rotation != [] :
 						for i in range(3) :
-							if rotation[i].replace("-","") != "0" :
+							if rotation[i].replace("-","") != "0" and not "e" in rotation[i] :
 								curr_rotat = etree.SubElement(curr_trans, "rotate")
 								curr_rotat.set(dict_index_to_axis[i], "1")
 								curr_rotat.set("angle", rotation[i])
+					# if scaling != [] :
+					# 	curr_scale = etree.SubElement(curr_trans, "scale")
+					# 	for i in range(3) :
+					# 		if scaling[i].replace("-","") != "0" and not "e" in scaling[i] :
+					# 			curr_scale.set(dict_index_to_axis[i], scaling[i])
+
+					if prerotation != [] :
+						for i in range(3) :
+							if prerotation[i].replace("-","") != "0" and not "e" in prerotation[i] :
+								curr_prerotat = etree.SubElement(curr_trans, "rotate")
+								curr_prerotat.set(dict_index_to_axis[i], "1")
+								curr_prerotat.set("angle", prerotation[i])
+
+					if translation2 != [] :
+						curr_translat2 = etree.SubElement(curr_trans, "translate")
+						for i in range(3) :
+							if translation2[i].replace("-","") != "0" and not "e" in translation2[i]:
+								curr_translat2.set(dict_index_to_axis[i], translation2[i])
+					if translation != [] :
+						curr_translat = etree.SubElement(curr_trans, "translate")
+						for i in range(3) :
+							if translation[i].replace("-","") != "0" and not "e" in translation[i]:
+								curr_translat.set(dict_index_to_axis[i], translation[i])
+
 
 					curr_ref = etree.SubElement(curr_shape, "ref")
 					curr_ref.set("id", link)

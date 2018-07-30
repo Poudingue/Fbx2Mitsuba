@@ -64,6 +64,8 @@ def transform(filename, verbose = False, debug = False) :
 		with open(filename+"_fbx.xml", "w", encoding="utf8") as outputfile :
 			if verbose : print("prettifying… (Can take a while for big files)")
 			stringout = etree.tostring(root).decode()
+			pretty = tools.prettifyXml(stringout)
 			if verbose : print("writing…")
-			outputfile.write(tools.prettifyXml(stringout))
+			outputfile.write(pretty)
+	if verbose : print("fbx2tree ended")
 	return tree
