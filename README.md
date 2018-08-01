@@ -6,7 +6,7 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 - export the 3dsmax scene to “scene.fbx” (ascii fbx, not binary !)
 - install python if you don't have it already
-- use converter.py (double)
+- use converter.py (double click if you don't know what to do)
 - available commands :
 	- --verbose (or -v) displays more info about conversion
 	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a long time for big files⚠️
