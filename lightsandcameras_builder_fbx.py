@@ -7,6 +7,7 @@ def build(root, nodes, models, verbose = False, debug = False) :
 
 	comment = etree.Comment("Lights and cameras")
 	root.append(comment)
+
 	# Prepare nodes and models properties for easy access
 	camera_nodes, light_nodes = [], []
 	for node in nodes :

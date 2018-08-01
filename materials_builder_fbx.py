@@ -44,6 +44,10 @@ def build(root, materials, textures_id, links_param, verbose = False, debug = Fa
 			curr_albedo = etree.SubElement(curr_material, "ref")
 			curr_albedo.set("name", "diffuseReflectance")
 			curr_albedo.set("id", linked["DiffuseColor"])
+		elif "3dsMax|Parameters|base_color_map" in linked :
+			curr_albedo = etree.SubElement(curr_material, "ref")
+			curr_albedo.set("name", "diffuseReflectance")
+			curr_albedo.set("id", linked["3dsMax|Parameters|base_color_map"])
 		else :
 			curr_albedo = etree.SubElement(curr_material, "spectrum")
 			curr_albedo.set("name", "diffuseReflectance")
@@ -67,8 +71,9 @@ def build(root, materials, textures_id, links_param, verbose = False, debug = Fa
 			curr_exponent.set("value", shininess)
 		else :
 			# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
+			# √(2/(α+2))
 			# But divided by 2, because mitsuba want its roughness in the range 0 - 0.5
-			roughness = (1./(float(shininess)+2.)) **(.5) if shininess != "" else 0 # Very glossy material if no shininess found
+			roughness = .5*((2./(float(shininess)+2.)) **(.5)) if shininess != "" else 0 # Very glossy material if no shininess found
 			curr_roughness = etree.SubElement(curr_material, "float")
 			curr_roughness.set("name", "alpha")
 			curr_roughness.set("value", str(roughness))

@@ -1,6 +1,14 @@
 from io import StringIO
 import xml.etree.ElementTree as etree
 
+# Useful to convert values with powers of ten in it
+def str2float2str(str_in) :
+	splitted = str_in.split("e")
+	if len(splitted) == 2 :
+		return "%.10f" % (float(splitted[0])*10**int(splitted[1])) # allow 10 digits
+	else :
+		return splitted[0]
+
 # Extract properties from an object in the fbx.
 def getProperties(object) :
 	dict = {}
@@ -48,7 +56,7 @@ def extract_links(links) :
 # /!\ can be changed to a tree as an argument for more efficient processing
 def prettifyXml(uglyxml) :
 	# This is a faster solution if it takes too long, but it's ugly with no indentation
-	return uglyxml.replace(">", ">\n")
+	# return uglyxml.replace(">", ">\n")
 
 	"""
 	# Code found here : https://gist.github.com/mahmoud/3081869

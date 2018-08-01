@@ -2,31 +2,6 @@ import os
 import tools
 import xml.etree.ElementTree as etree
 
-# allows extraction of correct data even with indexes and all the stuff
-"""
-def getValues(layerelement, nb_vertices, datatype) :
-	mapping_type = layerelement.find("MappingInformationType").text
-	reference_type = layerelement.find("ReferenceInformationType").text
-	if datatype == "normals" :
-		inputdata = layerelement.find("Normals").find("a").text.split(",")
-	elif datatype == "uv" :
-		inputdata = layerelement.find("UV").find("a").text.split(",")
-	else :
-		print("Unknown type of layer : "+datatype)
-	outdata = []
-	if reference_type == "IndexToDirect" :
-		index = layerelement.find("UV")
-
-		for i in range(nb_vertices) :
-			index = i else
-			outdata.append(" ".join(uvs[2*i:2*i+2]))
-	elif reference_type == "Direct" :
-		uvsindex = layeruv.find("UVIndex").find("a").text.split(",")
-		for i in range(len(uvsindex)) :
-			index = int(uvsindex[i])
-			outdata.append(" ".join(uvs[2*index:2*index+2]))
-"""
-
 
 def build(root, geometries, materials_ids, links_simple, links_revert, verbose = False, debug = False):
 	if verbose : print("shapes_builder_fbx launched")
@@ -90,13 +65,13 @@ def build(root, geometries, materials_ids, links_simple, links_revert, verbose =
 
 
 
-		vertices_in =              vertices_data.find("a").text.split(",")
-		polygons_in = list(map(int,polygons_data.find("a").text.split(",")))
-		edges_in    =                 edges_data.find("a").text.split(",")
-		normals_in  =               normals_data.find("a").text.split(",")
-		normalsW_in =              normalsW_data.find("a").text.split(",")
-		uv_in       =                    uv_data.find("a").text.split(",")
-		uv_index_in = list(map(int,uv_index_data.find("a").text.split(",")))
+		vertices_in = [tools.str2float2str(num) for num in vertices_data.find("a").text.split(",")]
+		polygons_in =                         list(map(int,polygons_data.find("a").text.split(",")))
+		edges_in    =    [tools.str2float2str(num) for num in edges_data.find("a").text.split(",")]
+		normals_in  =  [tools.str2float2str(num) for num in normals_data.find("a").text.split(",")]
+		normalsW_in = [tools.str2float2str(num) for num in normalsW_data.find("a").text.split(",")]
+		uv_in       =       [tools.str2float2str(num) for num in uv_data.find("a").text.split(",")]
+		uv_index_in =                         list(map(int,uv_index_data.find("a").text.split(",")))
 
 
 		vertices, polygon_vertex_index, normals, uv = [], [], [], []
@@ -179,10 +154,11 @@ def build(root, geometries, materials_ids, links_simple, links_revert, verbose =
 						vertex_index = vertex_indexes[k]
 						curr_vertex_text  = " ".join(vertices[vertex_index]) +" "
 						curr_vertex_text += " ".join( normals[curr_polygon_vertex_num]) +" "
-						curr_vertex_text += " ".join(      uv[vertex_index])
+						curr_vertex_text += " ".join(      uv[curr_polygon_vertex_num])
 						vertex_text.append(curr_vertex_text)
 					curr_polygon_vertex_num += 1
 
+				# Generate multiple triangle to replace polygons with more faces
 				if len(curr_poly_index) > 3 :
 					for k in range(len(curr_poly_index)-2) :
 						curr_poly = [curr_poly_index[0]]+curr_poly_index[k+1:k+3]

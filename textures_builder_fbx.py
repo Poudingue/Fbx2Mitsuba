@@ -15,8 +15,9 @@ def build(root, textures, verbose = False, debug = False, portable = False):
 		reference = texture.find("RelativeFilename" if portable else "FileName").text
 		uoff, voff = texture.find("ModelUVTranslation").text.split(",")
 		uscaling, vscaling = texture.find("ModelUVScaling").text.split(",")
-
-		if any(reference.endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
+		if reference == "" :
+			if verbose : print("Empty reference for id "+id)
+		elif any(reference.lower().endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
 
 			textures_id.append(id)
 
@@ -28,19 +29,25 @@ def build(root, textures, verbose = False, debug = False, portable = False):
 			reference_texture.set("name", "filename")
 			reference_texture.set("value", reference)
 
-			uoffset = etree.SubElement(curr_texture, "float")
-			uoffset.set("name", "uoffset")
-			uoffset.set("value", uoff)
-			voffset = etree.SubElement(curr_texture, "float")
-			voffset.set("name", "uoffset")
-			voffset.set("value", voff)
+			# Avoid cluttering for the final file, removing 0 offsets and 1 scaling
+			# Does'nt seem to change when texture is scaled/tiled
+			if uoff != "0" :
+				uoffset = etree.SubElement(curr_texture, "float")
+				uoffset.set("name", "uoffset")
+				uoffset.set("value", uoff)
+			if voff != "0" :
+				voffset = etree.SubElement(curr_texture, "float")
+				voffset.set("name", "voffset")
+				voffset.set("value", voff)
 
-			uscale = etree.SubElement(curr_texture, "float")
-			uscale.set("name", "uscale")
-			uscale.set("value", uscaling)
-			vscale = etree.SubElement(curr_texture, "float")
-			vscale.set("name", "vscale")
-			vscale.set("value", vscaling)
+			if uscaling != "1" :
+				uscale = etree.SubElement(curr_texture, "float")
+				uscale.set("name", "uscale")
+				uscale.set("value", uscaling)
+			if vscaling != "1" :
+				vscale = etree.SubElement(curr_texture, "float")
+				vscale.set("name", "vscale")
+				vscale.set("value", vscaling)
 		else :
 			print("Unknown texture file type : "+reference.split(".")[-1])
 			print("for file : "+reference)
