@@ -1,5 +1,25 @@
+import os
 from io import StringIO
+import math
+import config
 import xml.etree.ElementTree as etree
+from PIL import Image
+
+# Open an image, make it black and white, limit the value to .5 and save it if necessaryself.
+# Return a boolean indicating if it is necessary to create a new texture.
+def limit_rough(reference, invert) :
+	input = Image.open(reference).convert("L")# Convert to luminance
+	filename = reference.replace("\\","/").split("/")[-1]
+	if invert : input = input.point(lambda px : 255-px)# Invert if necessary
+	output = input.point(lambda px : .5*px)
+	if not os.path.exists("converted_textures") :
+		os.makedirs("converted_textures")
+	output.save("converted_textures/"+filename)
+	return True
+
+# Useful to make more readable functions
+def clamp(value, minv, maxv) :
+	return max(minv, min(value, maxv))
 
 # Useful to convert values with powers of ten in it
 def str2float2str(str_in) :
@@ -22,13 +42,32 @@ def getProperties(object) :
 				# if verbose : print(allinfo[0]+" = "+"".join(allinfo[1:]))
 	return dict
 
+# Convert a Kelvin temperature to an RGB value
+# I know mitsuba allow the creation of “Blackbody” with specification of kelvin temperature,
+# But this is not a normalized rgb value like in 3dsmax
+
+# Based on this blog post : https://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
+# Will maybe implement something more accurate later (full spectrum instead of rgb ???)
+# More material on blackbodies : https://en.wikipedia.org/wiki/Color_temperature
+def kelvin2rgb(kelvin) :
+	if kelvin < 1000 or kelvin > 40000 :
+		print("Kelvin value should be between 1 000 and 40 000, the value will be clamped to match these limits")
+	kelvin = clamp(kelvin, 1000, 40000) #Clamp value
+	kelvin *= .01 #Divide by 100 to deal with smaller numbers
+
+	red = 255. if kelvin <= 66 else clamp(329.698727446 * (kelvin - 60) ** -.1332047592 ,0, 255)
+	green = clamp(99.4708025861 * math.log(kelvin) - 161.1195681661 if kelvin <= 66
+		else 288.1221695283 * (kelvin - 60) ** -0.0755148492
+		, 0, 255)
+	blue =  0 if kelvin <= 19 else clamp(138.5177312231 * math.log(kelvin - 10) - 305.0447927307, 0, 255)
+	return red/255, green/255, blue/255 # Convert to a 0-1 range
+
 #
 def extract_links(links) :
-	dict_simple = {}
-	dict_invert = {}
-	dict_params = {}
+	dict_simple, dict_invert, dict_params, dict_parinv = {}, {}, {}, {}
 	for link in links :
 		splitted = link.text.split(",")
+
 		if splitted[0] == "OO" : # Simple link between 2 objects
 			# Dictionnary[id] = multiple links possible
 			if splitted[2] not in dict_simple :
@@ -44,52 +83,26 @@ def extract_links(links) :
 			if splitted[2] not in dict_params :
 				dict_params[splitted[2]] = {}
 			dict_params[splitted[2]][splitted[3].strip()] = splitted[1]
+			# Same for reverse dictionnary
+			if splitted[1] not in dict_parinv :
+				dict_parinv[splitted[1]] = {}
+			dict_parinv[splitted[1]][splitted[3].strip()] = splitted[1]
 
 		elif debug :
 			print("Unknown link type : "+splitted[0])
 
-	return(dict_simple, dict_invert, dict_params)
+	return(dict_simple, dict_invert, dict_params, dict_parinv)
 
 
 # Create a xml with correct indentation
 # uglyxml must be a string
 # /!\ can be changed to a tree as an argument for more efficient processing
 def prettifyXml(uglyxml) :
-	# This is a faster solution if it takes too long, but it's ugly with no indentation
+	# This is a faster solution if it takes too long, but it's ugly with no indentation,
+	# so use only for debug purposes or if the xml creation takes too long :
 	# return uglyxml.replace(">", ">\n")
 
-	"""
-	# Code found here : https://gist.github.com/mahmoud/3081869
-	# Doesn't seem to work properly
-	indent="   "
-	if not hasattr(uglyxml, "read"): # ElementTree uses file-like objects
-		fn = StringIO(uglyxml)  # cStringIO doesn't support UTF-8
-	else :
-		fn = uglyxml
-	cursor = 0
-	out_list = []
-	for event, elem in etree.iterparse(fn, events=('start', 'end')):
-		if event == 'start':
-			attrs = ' '.join([k+'="'+v+'"' for k, v in elem.items()])
-			cur_tag = ('<{tag} {attrs}>'.format(tag=elem.tag, attrs=attrs) if attrs else '<{tag}>'.format(tag=elem.tag))
-			if elem.text is None:
-				had_txt = False
-				txt = '\n'
-			else:
-				had_txt = True
-				txt = elem.text
-				out_list.extend([indent*cursor, cur_tag, txt])
-				cursor += 1
-		else :
-			cursor -= 1
-			cur_ind = cursor*indent if not had_txt else ''
-			out_list.extend([cur_ind, '</{0}>'.format(elem.tag), '\n'])
-			had_txt = False
-	return ''.join(out_list)
-
-	"""
 	multiline = uglyxml.replace(">", ">\n").replace("<","\n<").split("\n")
-	print("splitted")
 	out = ""
 	curr_indent = 0
 	intext = False # To avoid indenting after a text

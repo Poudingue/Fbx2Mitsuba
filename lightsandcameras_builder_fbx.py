@@ -1,8 +1,12 @@
 import math
 import tools
+import config
 import xml.etree.ElementTree as etree
 
-def build(root, nodes, models, verbose = False, debug = False) :
+def build(root, nodes, models) :
+	verbose = config.verbose
+	debug   = config.debug
+
 	if verbose : print("lightsandcameras_builder_fbx launched")
 
 	comment = etree.Comment("Lights and cameras")
@@ -48,7 +52,11 @@ def build(root, nodes, models, verbose = False, debug = False) :
 		else :
 			light_is_a_sphere = False
 
-		colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
+		if light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|useKelvin"][-1] == "1" :
+			colors = tools.kelvin2rgb(float(light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|kelvin"][-1]))
+		else :
+			colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
+
 		# Divide intensity by apparent surface of the sphere if it's not a point
 		intensity = float(light_node["Intensity"][-1])/(2.*math.pi*sphere_radius**2. if light_is_a_sphere else 1)
 		rvb = []

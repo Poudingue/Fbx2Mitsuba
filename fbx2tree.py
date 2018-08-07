@@ -1,8 +1,13 @@
 import re
 import tools
+import config
 import xml.etree.ElementTree as etree
 
-def transform(filename, verbose = False, debug = False) :
+def transform() :
+	filename = config.filename
+	verbose  = config.verbose
+	debug    = config.debug
+
 	if verbose : print("fbx2tree launched…")
 	root = etree.Element("root")
 	parents = []

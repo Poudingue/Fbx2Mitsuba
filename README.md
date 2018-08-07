@@ -5,7 +5,8 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 ## Howto
 
 - export the 3dsmax scene to “scene.fbx” (ascii fbx, not binary !)
-- install python if you don't have it already
+- install python 3.7 if you don't have it already
+- (recommended) install Pillow for python. If you don't, roughness map may cause some problems with values > 0.5
 - use converter.py (double)
 - available commands :
 	- --verbose (or -v) displays more info about conversion
@@ -16,7 +17,7 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 ## What will be converted
 
-- SOME cameras
+- Target cameras (the other ones probably won't)
 - Positions, colors and intensity of lights (sphere lights correctly taken into account)
 - Meshes (separated by material for a single 3d object)
 - Materials : Only Phong is correct for now. Other ones may not be correctly rendered
@@ -69,7 +70,9 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 ## Copyright and stuff
 
-Please understand that this is an experimental ongoing project, so the code might be ugly, and some unexpected problems might occur.
+The source code is intended to be viewed with a 4 space indentation
+Please understand that this is an experimental ongoing project, some unexpected problems might occur.
 
 Right now, you can use my (unfinished) work, but i'm not responsible if anything goes wrong.
+However, right now it's under WTFPL license.
 So, use at your own risks, be responsible, fasten your seatbelts, and drive safely.
