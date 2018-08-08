@@ -88,7 +88,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 		if "3dsMax|Parameters|roughness" in properties :
 			if "3dsMax|Parameters|roughness_map" in linked : # Use a texture
 				inverted_roughness = properties["3dsMax|Parameters|roughness_inv"][-1] == "1"
-				if tools.limit_rough(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness) :
+				if tools.roughness_convert(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness) :
 					# Create a new texture
 					curr_roughness = etree.SubElement(curr_material, "texture")
 					curr_roughness.set("name", "alpha")

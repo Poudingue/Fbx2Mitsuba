@@ -7,10 +7,12 @@ from PIL import Image
 
 # Open an image, make it black and white, limit the value to .5 and save it if necessaryself.
 # Return a boolean indicating if it is necessary to create a new texture.
-def limit_rough(reference, invert) :
+def roughness_convert(reference, invert) :
 	input = Image.open(reference).convert("L")# Convert to luminance
 	filename = reference.replace("\\","/").split("/")[-1]
-	if invert : input = input.point(lambda px : 255-px)# Invert if necessary
+	# Invert if necessary (linearly to match how 3dsmax behaves)
+	if invert : # Linear inversion : -> convert to linear, invert, reconvert to perceptual
+		input = input.point(lambda px : int(255 * (1.-(float(px)/255.)**2.2)**(1./2.2)))
 	output = input.point(lambda px : .5*px)
 	if not os.path.exists("converted_textures") :
 		os.makedirs("converted_textures")

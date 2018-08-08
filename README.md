@@ -6,35 +6,37 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 - export the 3dsmax scene to “scene.fbx” (ascii fbx, not binary !)
 - install python 3.7 if you don't have it already
-- (recommended) install Pillow for python. If you don't, roughness map may cause some problems with values > 0.5
-- use converter.py (double)
+- install Pillow for Python (used for roughness map conversion)
+- use converter.py (double click on it if you don't know how)
 - available commands :
 	- --verbose (or -v) displays more info about conversion
-	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a long time for big files⚠️
+	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a very long time for big files⚠️
  	- --realist and --closest allow to choose between the most realistic rendering or the more faithful to the original 3dsmax. If you don't know don't put any, it will achieve a “balanced” look
 	- --portable uses relative file path for textures, useful if you intend to transfer your scene to another computer
 - the mitsuba output file is “scene.xml”
 
 ## What will be converted
 
-- Target cameras (the other ones probably won't)
+- Target cameras
 - Positions, colors and intensity of lights (sphere lights correctly taken into account)
 - Meshes (separated by material for a single 3d object)
-- Materials : Only Phong is correct for now. Other ones may not be correctly rendered
-- Textures should work for diffuse, with uv mapping.
+- Materials : Should work pretty well with 3dsmax's “physical” materials.
+- Textures should work for diffuse, roughness and bumpmapping, with uv mapping.
 
 ## What won't be converted
 
 ### Should be fixed soon
 
+- Other cameras
 - Background color/light
-- Normal, bumpmapping, and any textured caracteristic which is not diffuse are not yet supported
-- Some cameras won't be transfered because… Because reasons.
+- Colored specular
+- Some advanced texture-based characteristics are not yet supported
 - Object depending on a hierarchy won't be included in the final scene (yet), to avoid problems with placement.
 
 ### Harder to fix, will try anyway
 
 - Non pointlight light types are not included
+- Translucent materials
 
 ### Probably unfixable
 
