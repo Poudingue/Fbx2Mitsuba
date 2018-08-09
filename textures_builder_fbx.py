@@ -19,10 +19,12 @@ def build(root, textures, links_param_revert):
 		uoff, voff         = texture.find("ModelUVTranslation").text.split(",")
 		uscaling, vscaling = texture.find("ModelUVScaling"    ).text.split(",")
 
+		if reference == "" :
+			if verbose : print("Empty reference for id "+id+", replacing with error texture")
+			reference = "missing_texture.png"
+
 		if id not in links_param_revert :
 			if verbose : print("Texture "+reference+" never used. Not writing it to file.")
-		elif reference == "" :
-			if verbose : print("Empty reference for id "+id)
 		elif reference.lower().endswith("dds") :
 			if verbose : print("dds format not supported")#(yet ?)
 		elif any(reference.lower().endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):

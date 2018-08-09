@@ -40,9 +40,6 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_material = etree.SubElement(root, "bsdf")
 			curr_material.set("id", id)
 
-		if shading != "phong" and config.verbose :
-			print("Unknown material for object "+id+", using phong")
-
 		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
 			       else (" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse
 		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else ""
@@ -105,7 +102,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 					curr_roughness.set("name", "alpha")
 					curr_roughness.set("id", linked["3dsMax|Parameters|roughness_map"])
 			else : # Use a value
-				roughness = properties["3dsMax|Parameters|roughness"][-1]
+				roughness = .5*float(properties["3dsMax|Parameters|roughness"][-1])
 				curr_roughness = etree.SubElement(curr_material, "float")
 				curr_roughness.set("name", "alpha")
 				curr_roughness.set("value", str(roughness))
@@ -124,8 +121,8 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			else :
 				# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
 				# √(2/(α+2))
-				# But limited to .5, because mitsuba doesn't support higher roughness
-				roughness = min((2./((float(shininess)+2.)) ** (.5)), .5) if shininess != "" else 0 # Very glossy material if no shininess found
+				# But divided by 2, because mitsuba doesn't support higher roughness
+				roughness = 1./((float(shininess)+2.)) ** (.5) if shininess != "" else 0 # Very glossy material if no shininess found
 				curr_roughness = etree.SubElement(curr_material, "float")
 				curr_roughness.set("name", "alpha")
 				curr_roughness.set("value", str(roughness))

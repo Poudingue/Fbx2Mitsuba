@@ -1,0 +1,16 @@
+meshes/
+materials/
+fbxinfos/
+__pycache__/
+*.jpg
+*.png 
+*.exr
+*.max
+*.ASE
+*.FBX
+*.max
+*.xml
+*.mip
+*.imsq
+*.log
+*.bak

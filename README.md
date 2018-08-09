@@ -22,6 +22,7 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 - Meshes (separated by material for a single 3d object)
 - Materials : Should work pretty well with 3dsmax's “physical” materials.
 - Textures should work for diffuse, roughness and bumpmapping, with uv mapping.
+	- If a texture reference is not found, the texture will be replaced with a default error texture
 
 ## What won't be converted
 
@@ -30,6 +31,7 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 - Other cameras
 - Background color/light
 - Colored specular
+- Some bumpmap seem to be referencing other textures. Investigate.
 - Some advanced texture-based characteristics are not yet supported
 - Object depending on a hierarchy won't be included in the final scene (yet), to avoid problems with placement.
 

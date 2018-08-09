@@ -18,12 +18,13 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 				if link in shapes_ids and "0" in links_revert[id] : #For now only models depending on root node to avoid misplacement
 					properties = tools.getProperties(model)
 
+					# geomtranslat and geomrotat are to be applied before scaling
+					geomtranslat= [tools.str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
+					geomrotat   = [tools.str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if "GeometricRotation"    in properties else [])]
+					scaling     = [tools.str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
+					rotation    = [tools.str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if      "Lcl Rotation"    in properties else [])]
 					prerotation = [tools.str2float2str(numb) for numb in (properties         ["PreRotation"][-3:] if          "PreRotation" in properties else [])]
 					translation = [tools.str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
-					translation2= [tools.str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
-					rotation    = [tools.str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if      "Lcl Rotation"    in properties else [])]
-					rotation2   = [tools.str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if "GeometricRotation"    in properties else [])]
-					scaling     = [tools.str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
 
 					curr_shape = etree.SubElement(root, "shape")
 					curr_shape.set("type", "instance") # To remove if the code below is used
@@ -44,16 +45,16 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 					# Add infos to xml only if != 0 to make for a lighter and cleaner file
 					# For some reason, the prerotation must come after everything EXCEPT translation.
 
-					if translation2 != [] :
+					if geomtranslat != [] :
 						curr_translat2 = etree.SubElement(curr_trans, "translate")
 						for i in range(3) :
-							curr_string = translation2[i]
+							curr_string = geomtranslat[i]
 							if float(curr_string) != 0 :
-								curr_translat2.set(dict_index_to_axis[i], translation2[i])
+								curr_translat2.set(dict_index_to_axis[i], geomtranslat[i])
 
-					if rotation2 != [] :
+					if geomrotat != [] :
 						for i in range(3) :
-							curr_string = rotation2[i]
+							curr_string = geomrotat[i]
 							if float(curr_string) != 0 :
 								curr_rotat = etree.SubElement(curr_trans, "rotate")
 								curr_rotat.set(dict_index_to_axis[i], "1")

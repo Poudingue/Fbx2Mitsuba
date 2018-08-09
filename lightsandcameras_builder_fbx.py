@@ -52,7 +52,10 @@ def build(root, nodes, models) :
 		else :
 			light_is_a_sphere = False
 
-		if light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|useKelvin"][-1] == "1" :
+		if "3dsMax|FAreaParameters" in light_node :
+			print("Area lights not supported, light with id "+id+"will be considered as a point light")
+			colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
+		elif light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|useKelvin"][-1] == "1" :
 			colors = tools.kelvin2rgb(float(light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|kelvin"][-1]))
 		else :
 			colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]

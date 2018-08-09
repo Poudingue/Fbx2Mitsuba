@@ -5,23 +5,30 @@ import config
 import xml.etree.ElementTree as etree
 from PIL import Image
 
-# Open an image, make it black and white, limit the value to .5 and save it if necessaryself.
-# Return a boolean indicating if it is necessary to create a new texture.
+
+# Open an image and make it compatible with roughness as Mitsuba suggests it :
+# No value above .5, and if this is a glossinness map, do an inversion (linear, it's what 3dsmax seems to be doing)
 def roughness_convert(reference, invert) :
-	input = Image.open(reference).convert("L")# Convert to luminance
+	input = Image.open(reference)# Convert to luminance
 	filename = reference.replace("\\","/").split("/")[-1]
-	# Invert if necessary (linearly to match how 3dsmax behaves)
+
+	# Dither it ? There is a loss of precision with linear invert, with halving, and with conversion to Luminance (1 channel instead of 3)
+
 	if invert : # Linear inversion : -> convert to linear, invert, reconvert to perceptual
-		input = input.point(lambda px : int(255 * (1.-(float(px)/255.)**2.2)**(1./2.2)))
-	output = input.point(lambda px : .5*px)
+		output = input.point(lambda px : int(.5* 255. * (1.-(float(px)/255.)**2.2)**(1./2.2))).convert("L")
+	else :
+		output = input.point(lambda px : .5*px).convert("L")
+
 	if not os.path.exists("converted_textures") :
 		os.makedirs("converted_textures")
 	output.save("converted_textures/"+filename)
 	return True
 
+
 # Useful to make more readable functions
 def clamp(value, minv, maxv) :
 	return max(minv, min(value, maxv))
+
 
 # Useful to convert values with powers of ten in it
 def str2float2str(str_in) :
@@ -30,6 +37,7 @@ def str2float2str(str_in) :
 		return "%.10f" % (float(splitted[0])*10**int(splitted[1])) # allow 10 digits
 	else :
 		return splitted[0]
+
 
 # Extract properties from an object in the fbx.
 def getProperties(object) :
@@ -44,24 +52,29 @@ def getProperties(object) :
 				# if verbose : print(allinfo[0]+" = "+"".join(allinfo[1:]))
 	return dict
 
+
 # Convert a Kelvin temperature to an RGB value
-# I know mitsuba allow the creation of “Blackbody” with specification of kelvin temperature,
+# I know mitsuba allows the creation of “Blackbody” with specification of kelvin temperature,
 # But this is not a normalized rgb value like in 3dsmax
 
 # Based on this blog post : https://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
-# Will maybe implement something more accurate later (full spectrum instead of rgb ???)
-# More material on blackbodies : https://en.wikipedia.org/wiki/Color_temperature
+# Will maybe implement something more accurate later (full spectrum instead of rgb ??? Mitsuba has spectral rendering)
+# More info on blackbodies : https://en.wikipedia.org/wiki/Color_temperature
 def kelvin2rgb(kelvin) :
+
 	if kelvin < 1000 or kelvin > 40000 :
-		print("Kelvin value should be between 1 000 and 40 000, the value will be clamped to match these limits")
+		print("Kelvin values should be between 1 000 and 40 000, the value will be clamped to match these limits")
 	kelvin = clamp(kelvin, 1000, 40000) #Clamp value
 	kelvin *= .01 #Divide by 100 to deal with smaller numbers
 
 	red = 255. if kelvin <= 66 else clamp(329.698727446 * (kelvin - 60) ** -.1332047592 ,0, 255)
+
 	green = clamp(99.4708025861 * math.log(kelvin) - 161.1195681661 if kelvin <= 66
 		else 288.1221695283 * (kelvin - 60) ** -0.0755148492
 		, 0, 255)
+
 	blue =  0 if kelvin <= 19 else clamp(138.5177312231 * math.log(kelvin - 10) - 305.0447927307, 0, 255)
+
 	return red/255, green/255, blue/255 # Convert to a 0-1 range
 
 #
