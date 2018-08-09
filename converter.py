@@ -18,7 +18,7 @@ if args.closest and args.realist :
 	print("Incompatible options : --closest and --realist. Choose one, or neither for a balanced result")
 	exit(0)
 
-config.filename = "scene"# TODO Should be an argument
+config.filename = "simplecube"# TODO Should be an argument
 config.verbose  = args.verbose
 config.debug    = args.debug
 config.closest  = args.closest

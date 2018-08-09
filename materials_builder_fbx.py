@@ -45,7 +45,75 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else ""
 		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
 
-		# I tried using dielectric, but it only made materials with transmittance
+		# Specular transmittance
+		if "3dsMax|Parameters|transparency" in properties and float(properties["3dsMax|Parameters|transparency"][-1]) > 0 :
+			transp = 1 - float(properties["3dsMax|Parameters|transparency"][-1])
+			transp_color = " ".join(properties["3dsMax|Parameters|trans_color"][-4:-1])
+			curr_material.set("type", "blendbsdf")
+			curr_weight = etree.SubElement(curr_material, "float")
+			curr_weight.set("name", "weight")
+			curr_weight.set("value", str(transp))
+			# Transparent material for the blend
+			curr_transp = etree.SubElement(curr_material, "bsdf")
+			curr_transp.set("type","roughdielectric")
+
+			curr_distrib= etree.SubElement(curr_transp, "string")
+			curr_distrib.set("name", "distribution")
+			curr_distrib.set("value", "ggx" if config.realist else "phong")
+
+			curr_transmittance = etree.SubElement(curr_transp, "spectrum")
+			curr_transmittance.set("name", "specularTransmittance")
+			curr_transmittance.set("value", transp_color)
+
+			curr_roughness = etree.SubElement(curr_transp, "float")
+			curr_roughness.set("name", "alpha")
+			curr_roughness.set("value", properties["3dsMax|Parameters|trans_roughness"][-1])
+
+			if "3dsMax|Parameters|trans_ior" in properties :
+				ior = properties["3dsMax|Parameters|trans_ior"][-1]
+				curr_ior = etree.SubElement(curr_transp, "float")
+				curr_ior.set("name", "intIOR")
+				curr_ior.set("value", ior)
+
+			# Non-transparent part of the material
+			curr_material = etree.SubElement(curr_material, "bsdf")
+
+		# Metalness
+		if "3dsMax|Parameters|metalness" in properties and float(properties["3dsMax|Parameters|metalness"][-1]) > 0 :
+			metalness = 1-float(properties["3dsMax|Parameters|metalness"][-1])
+			curr_material.set("type", "blendbsdf")
+			curr_weight = etree.SubElement(curr_material, "float")
+			curr_weight.set("name", "weight")
+			curr_weight.set("value", str(metalness))
+
+			# Metal material for the blend
+			curr_metal = etree.SubElement(curr_material, "bsdf")
+			curr_metal.set("type","roughconductor")
+
+			curr_distrib= etree.SubElement(curr_metal, "string")
+			curr_distrib.set("name", "distribution")
+			curr_distrib.set("value", "ggx" if config.realist else "phong")
+
+			curr_roughness = etree.SubElement(curr_metal, "float")#TODO roughness of the material
+			curr_roughness.set("name", "alpha")
+			curr_roughness.set("value", "0")
+
+			curr_preset = etree.SubElement(curr_metal, "string")
+			curr_preset.set("name", "material")
+			curr_preset.set("value", "none")
+
+			curr_ior = etree.SubElement(curr_metal, "spectrum")
+			curr_ior.set("name", "k")
+			curr_ior.set("value", "1")
+
+			curr_spec_color = etree.SubElement(curr_metal, "spectrum")
+			curr_spec_color.set("name", "specularReflectance")
+			curr_spec_color.set("value", ".9 0 0")# TODO debug red to see it, apply “diffuse” color or material
+
+			# Non-metal part of the material
+			curr_material = etree.SubElement(curr_material, "bsdf")
+
+		# Non transmitting and non-metal part of the material
 		curr_material.set("type", "phong" if config.closest else "roughplastic")
 
 		curr_distrib = etree.SubElement(curr_material, "string")
@@ -73,7 +141,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_albedo.set("name", "diffuseReflectance")
 			curr_albedo.set("value", diffuse_color)
 
-		# Not physically based, except for metals. Include ?
+		# Not physically based, except for metals. Include ??
 		"""
 		if specular_color != "" : # Set up only if there is such a color
 			curr_spec_color = etree.SubElement(curr_material, "spectrum")
@@ -85,22 +153,18 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 		if "3dsMax|Parameters|roughness" in properties :
 			if "3dsMax|Parameters|roughness_map" in linked : # Use a texture
 				inverted_roughness = properties["3dsMax|Parameters|roughness_inv"][-1] == "1"
-				if tools.roughness_convert(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness) :
-					# Create a new texture
-					curr_roughness = etree.SubElement(curr_material, "texture")
-					curr_roughness.set("name", "alpha")
-					curr_roughness.set("type", "bitmap")
-					vscale = etree.SubElement(curr_roughness, "float")
-					vscale.set("name", "vscale")
-					vscale.set("value", "-1")
-					filename = textures_id[linked["3dsMax|Parameters|roughness_map"]].replace("\\","/").split("/")[-1]
-					reference_texture = etree.SubElement(curr_roughness, "string")
-					reference_texture.set("name", "filename")
-					reference_texture.set("value", "converted_textures/"+filename)
-				else :
-					curr_roughness = etree.SubElement(curr_material, "ref")
-					curr_roughness.set("name", "alpha")
-					curr_roughness.set("id", linked["3dsMax|Parameters|roughness_map"])
+				reference = tools.roughness_convert(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness)
+				# Create a new texture
+				curr_roughness = etree.SubElement(curr_material, "texture")
+				curr_roughness.set("name", "alpha")
+				curr_roughness.set("type", "bitmap")
+				vscale = etree.SubElement(curr_roughness, "float")
+				vscale.set("name", "vscale")
+				vscale.set("value", "-1")
+				filename = textures_id[linked["3dsMax|Parameters|roughness_map"]].replace("\\","/").split("/")[-1]
+				reference_texture = etree.SubElement(curr_roughness, "string")
+				reference_texture.set("name", "filename")
+				reference_texture.set("value", reference)
 			else : # Use a value
 				roughness = .5*float(properties["3dsMax|Parameters|roughness"][-1])
 				curr_roughness = etree.SubElement(curr_material, "float")

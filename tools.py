@@ -3,12 +3,20 @@ from io import StringIO
 import math
 import config
 import xml.etree.ElementTree as etree
-from PIL import Image
+try :
+	from PIL import Image
+	pilimported = True
+except ImportError:
+	pilimported = False
 
 
 # Open an image and make it compatible with roughness as Mitsuba suggests it :
 # No value above .5, and if this is a glossinness map, do an inversion (linear, it's what 3dsmax seems to be doing)
+# Return
 def roughness_convert(reference, invert) :
+	if not pilimported :
+		print("Pillow doesn't seem to be installed, roughness map may cause some problems.")
+		return reference
 	input = Image.open(reference)# Convert to luminance
 	filename = reference.replace("\\","/").split("/")[-1]
 
@@ -22,7 +30,7 @@ def roughness_convert(reference, invert) :
 	if not os.path.exists("converted_textures") :
 		os.makedirs("converted_textures")
 	output.save("converted_textures/"+filename)
-	return True
+	return "converted_textures/"+filename
 
 
 # Useful to make more readable functions
