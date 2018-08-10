@@ -18,9 +18,12 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 ## What will be converted
 
 - Target cameras
-- Positions, colors and intensity of lights (sphere lights correctly taken into account)
+- Positions, colors and intensity of photometric pointlights (sphere lights correctly taken into account)
 - Meshes (separated by material for a single 3d object)
+	- Hierarchy of objects will be lost, but their placement should be ok now
 - Materials : Should work pretty well with 3dsmax's “physical” materials.
+	- Metalness should work properly, with specular color based on diffuse
+	- Transparency should work properly, with correct IOR and colored specular transmittance
 - Textures should work for diffuse, roughness and bumpmapping, with uv mapping.
 	- If a texture reference is not found, the texture will be replaced with a default error texture
 
@@ -30,15 +33,11 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 - Other cameras
 - Background color/light
-- Colored specular
 - Some bumpmap seem to be referencing other textures. Investigate.
-- Some advanced texture-based characteristics are not yet supported
-- Object depending on a hierarchy won't be included in the final scene (yet), to avoid problems with placement.
 
 ### Harder to fix, will try anyway
 
-- Non pointlight light types are not included
-- Translucent materials
+- Other light types are not included
 
 ### Probably unfixable
 
