@@ -44,8 +44,6 @@ def build(root, nodes, models) :
 	for i in range(len(light_nodes)) :
 		light_node, light_model = light_nodes[i], light_models[i]
 
-		light_pos = light_model["Lcl Translation"][-3:]
-
 		if "3dsMax|FSphereExtParameters|light_radius" in light_node :
 			light_is_a_sphere = True
 			sphere_radius = float(light_node["3dsMax|FSphereExtParameters|light_radius"][-1])
@@ -58,7 +56,7 @@ def build(root, nodes, models) :
 		elif light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|useKelvin"][-1] == "1" :
 			colors = tools.kelvin2rgb(float(light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|kelvin"][-1]))
 		else :
-			colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
+			colors = light_node["Color"][-3:] if "Color" in light_node else ["1"]
 
 		# Divide intensity by apparent surface of the sphere if it's not a point
 		intensity = float(light_node["Intensity"][-1])/(2.*math.pi*sphere_radius**2. if light_is_a_sphere else 1)
@@ -75,18 +73,10 @@ def build(root, nodes, models) :
 			object = "emitter",
 			type   = "area" if light_is_a_sphere else "point"
 		)
-		tools.set_value(light, "spectrum", "radiance", " ".join(rvb))
 
-		light_transform = tools.create_obj(
-			parent = light_shape if light_is_a_sphere else light,
-			object = "transform",
-			type   = "toWorld"
-		)
+		tools.set_value(light, "spectrum", "radiance" if light_is_a_sphere else "intensity", " ".join(rvb))
 
-		light_translate = etree.SubElement(light_transform if light_is_a_sphere else light_transform, "translate")
-		light_translate.set("x", str(light_pos[0]))
-		light_translate.set("y", str(light_pos[1]))
-		light_translate.set("z", str(light_pos[2]))
+		tools.transform_object(light_shape if light_is_a_sphere else light, light_model)
 
 	# Handle cameras
 

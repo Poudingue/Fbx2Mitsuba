@@ -1,6 +1,7 @@
 import os
 import tools
 import config
+from pathlib import Path
 import xml.etree.ElementTree as etree
 
 def build(root, textures, links_param_revert):
@@ -30,6 +31,9 @@ def build(root, textures, links_param_revert):
 		elif any(reference.lower().endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
 
 			textures_id[id] = reference
+			if not Path(reference).is_file() :
+				if verbose : print("Missing texture : "+reference)
+				reference = "missing_texture.png"
 			curr_texture = tools.create_obj(root, "texture", "bitmap", id)
 			tools.set_value(curr_texture, "string", "filename", reference)
 

@@ -27,9 +27,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_bumpmod = tools.create_obj(root, "bsdf", "bumpmap", id)
 			curr_bumpmap = tools.create_obj(curr_bumpmod, "texture", "scale")
 			tools.set_value(curr_bumpmap, "float", "scale", properties["3dsMax|Parameters|bump_map_amt"][-1])
-
-			curr_texture = etree.SubElement(curr_bumpmap, "ref")
-			curr_texture.set("id", linked["3dsMax|Parameters|bump_map"])
+			tools.set_ref(curr_bumpmap, linked["3dsMax|Parameters|bump_map"])
 
 			curr_material = etree.SubElement(curr_bumpmod, "bsdf")
 		else :
@@ -37,9 +35,39 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_material.set("id", id)
 
 		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
-					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse
+					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "")) #Use red if there is no diffuse
 		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else ""
 		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
+
+		# Roughness
+		if "3dsMax|Parameters|roughness" in properties :
+			if "3dsMax|Parameters|roughness_map" in linked : # Use a texture
+				inverted_roughness = properties["3dsMax|Parameters|roughness_inv"][-1] == "1"
+				reference = tools.roughness_convert(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness)
+				filename = textures_id[linked["3dsMax|Parameters|roughness_map"]].replace("\\","/").split("/")[-1]
+
+				# Create a new texture
+				curr_roughness = tools.new_obj("texture", "bitmap")
+				curr_roughness.set("name", "alpha")
+				tools.set_value(curr_roughness, "float",  "vscale", "-1")# TODO Use the vscale of the texture
+				tools.set_value(curr_roughness, "string", "filename", reference)
+			else : # Use a value
+				roughness = .5*float(properties["3dsMax|Parameters|roughness"][-1])
+				if roughness == 0 :
+					curr_roughness = None
+				else :
+					curr_roughness = etree.Element("float")
+					curr_roughness.set("name", "alpha")
+					curr_roughness.set("value", str(roughness))
+		else :
+			curr_roughness = None
+			# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
+			# √(2/(α+2))
+			# But divided by 2, because mitsuba doesn't support higher roughness
+			roughness = 1./((float(shininess)+2.)) ** (.5) if shininess != "" else 0 # Very glossy material if no shininess found
+			curr_roughness = etree.Element("float")
+			curr_roughness.set("name", "alpha")
+			curr_roughness.set("value", str(roughness))
 
 		# Specular transmittance
 		if "3dsMax|Parameters|transparency" in properties and float(properties["3dsMax|Parameters|transparency"][-1]) > 0 :
@@ -61,71 +89,60 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_material = etree.SubElement(curr_material, "bsdf")
 
 		# Metalness
-		if "3dsMax|Parameters|metalness" in properties and float(properties["3dsMax|Parameters|metalness"][-1]) > 0 :
-			curr_material.set("type", "blendbsdf")
-			tools.set_value(curr_material, "float", "weight",
-				str(1 - float(properties["3dsMax|Parameters|metalness"][-1])))# 1 - Metalness
-
+		metalness = float(properties["3dsMax|Parameters|metalness"][-1]) if "3dsMax|Parameters|metalness" in properties else 0
+		if metalness > 0 :
+			if metalness < 1 :
+				curr_material.set("type", "blendbsdf")
+				tools.set_value(curr_material, "float", "weight",
+					str(1 - float(properties["3dsMax|Parameters|metalness"][-1])))# 1 - Metalness
+				curr_metal = tools.create_obj(curr_material, "bsdf", "roughconductor" if curr_roughness != None else "conductor")
+			else :
+				curr_material.set("type", "roughconductor" if curr_roughness != None else "conductor")
+				curr_metal = curr_material
 			# Metal part of the material
-			curr_metal = tools.create_obj(curr_material, "bsdf", "roughconductor")
 			tools.set_value(curr_metal, "string"  , "distribution", config.distrib)
-			tools.set_value(curr_metal, "float"   , "alpha"       , "0") #TODO roughness of the material
+			if curr_roughness != None :
+				curr_metal.append(curr_roughness)
 			tools.set_value(curr_metal, "string"  , "material"    , "none") # Perfect mirror, the color is set via specularReflectance.
-			tools.set_value(curr_metal, "spectrum", "specularReflectance", ".9 .1 0")# TODO debug red to see it, apply “diffuse” color or texture
+			# Copy-paste from diffuse, this is what 3dsmax uses
+			if "DiffuseColor" in linked :# Use a texture
+				tools.set_value(curr_metal, "ref", "specularReflectance", linked["DiffuseColor"])
+			elif "3dsMax|Parameters|base_color_map" in linked :
+				tools.set_value(curr_metal, "ref", "specularReflectance", linked["3dsMax|Parameters|base_color_map"])
+			else :
+				tools.set_value(curr_metal, "spectrum", "specularReflectance", diffuse_color)
 
 			# Non-metal part of the material
-			curr_material = etree.SubElement(curr_material, "bsdf")
+			if metalness < 1 : curr_material = etree.SubElement(curr_material, "bsdf")
 
-		# Non transmitting and non-metal part of the material
-		curr_material.set("type", "phong" if config.closest else "roughplastic")
-		tools.set_value(curr_material, "string", "distribution", config.distrib)
+		# Non transmitting and non-metal part of the material. Only if metalness < 1
+		if metalness < 1 :
+			curr_material.set("type", "phong" if config.closest else ("roughplastic" if curr_roughness != None else "plastic"))
+			tools.set_value(curr_material, "string", "distribution", config.distrib)
 
-		# keep the original diffuse independantly of ior.
-		if config.realist :
-			tools.set_value(curr_material, "boolean", "nonlinear", "true")
+			# keep the original diffuse independantly of ior.
+			if config.realist :
+				tools.set_value(curr_material, "boolean", "nonlinear", "true")
 
-		if "DiffuseColor" in linked :# Use a texture
-			tools.set_value(curr_material, "ref", "diffuseReflectance", linked["DiffuseColor"])
-		elif "3dsMax|Parameters|base_color_map" in linked :
-			tools.set_value(curr_material, "ref", "diffuseReflectance", linked["3dsMax|Parameters|base_color_map"])
-		else :
-			tools.set_value(curr_material, "spectrum", "diffuseReflectance", diffuse_color)
+			if "DiffuseColor" in linked :# Use a texture
+				tools.set_value(curr_material, "ref", "diffuseReflectance", linked["DiffuseColor"])
+			elif "3dsMax|Parameters|base_color_map" in linked :
+				tools.set_value(curr_material, "ref", "diffuseReflectance", linked["3dsMax|Parameters|base_color_map"])
+			else :
+				tools.set_value(curr_material, "spectrum", "diffuseReflectance", diffuse_color)
 
-		# Not physically based, except for metals. Include ??
-		"""
-		if specular_color != "" : # Set up only if there is such a color
-			curr_spec_color = etree.SubElement(curr_material, "spectrum")
-			curr_spec_color.set("name", "specularReflectance")
-			curr_spec_color.set("value", " ".join(str(color) for color in specular_color.split(" ")))
-		"""
-
-		# microfacet model if this parameter exists
-		if "3dsMax|Parameters|roughness" in properties :
-			if "3dsMax|Parameters|roughness_map" in linked : # Use a texture
-				inverted_roughness = properties["3dsMax|Parameters|roughness_inv"][-1] == "1"
-				reference = tools.roughness_convert(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness)
-				filename = textures_id[linked["3dsMax|Parameters|roughness_map"]].replace("\\","/").split("/")[-1]
-
-				# Create a new texture
-				curr_roughness = tools.create_obj(curr_material, "texture", "bitmap")
-				curr_roughness.set("name", "alpha")
-				tools.set_value(curr_roughness, "float",  "vscale", "-1")# TODO Use the vscale of the texture
-				tools.set_value(curr_roughness, "string", "filename", reference)
-			else : # Use a value
-				roughness = .5*float(properties["3dsMax|Parameters|roughness"][-1])
-				tools.set_value(curr_material, "float",  "alpha", str(roughness))
+			if specular_color != "" : # Set up only if there is such a color
+				curr_spec_color = etree.SubElement(curr_material, "spectrum")
+				curr_spec_color.set("name", "specularReflectance")
+				curr_spec_color.set("value", " ".join(str(color) for color in specular_color.split(" ")))
 
 			if "3dsMax|Parameters|coat_ior" in properties :
 				ior = properties["3dsMax|Parameters|coat_ior"][-1]
 				tools.set_value(curr_material, "float", "intIOR", ior)
 
-		else :
-			if config.closest : # Use the Phong plugin
+			if config.closest and shininess != "" :
 				tools.set_value(curr_material, "float", "exponent", shininess)
-			else :
-				# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
-				# √(2/(α+2))
-				# But divided by 2, because mitsuba doesn't support higher roughness
-				roughness = 1./((float(shininess)+2.)) ** (.5) if shininess != "" else 0 # Very glossy material if no shininess found
-				tools.set_value(curr_material, "float", "alpha", str(roughness))
+			elif curr_roughness != None :
+				curr_material.append(curr_roughness)
+
 	return material_ids

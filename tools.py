@@ -15,7 +15,12 @@ def set_value(parent, type, name, value) :
 	curr_elem = etree.SubElement(parent, type)
 	curr_elem.set("name", name)
 	curr_elem.set("id" if type in ["ref", "shapegroup"] else "value", value) # The can be an id
-	return curr_elem
+	return curr_elem # In case we need it somewhere
+
+def set_ref(parent, id) :
+	curr_ref = etree.SubElement(parent, "ref")
+	curr_ref.set("id", id)
+	return curr_ref # In case we need it somewhere
 
 def create_obj(parent, object, type, id=missing) :
 	curr_elem = etree.SubElement(parent, object)
@@ -24,12 +29,19 @@ def create_obj(parent, object, type, id=missing) :
 		curr_elem.set("id", id)
 	return curr_elem
 
+def new_obj(object, type, id=missing) :
+	curr_elem = etree.Element(object)
+	curr_elem.set("type", type)
+	if id is not missing :
+		curr_elem.set("id", id)
+	return curr_elem
+
 # Open an image and make it compatible with roughness as Mitsuba suggests it :
 # No value above .5, and if this is a glossinness map, do an inversion (linear, it's what 3dsmax seems to be doing)
-# Return
+# Returns the reference of the texture to use
 def roughness_convert(reference, invert) :
 	if not pilimported :
-		print("Pillow doesn't seem to be installed, roughness map may cause some problems.")
+		print("Pillow doesn't seem to be installed, roughness maps may cause some problems.")
 		return reference
 	input = Image.open(reference)# Convert to luminance
 	filename = reference.replace("\\","/").split("/")[-1]
@@ -129,6 +141,70 @@ def extract_links(links) :
 			print("Unknown link type : "+splitted[0])
 
 	return(dict_simple, dict_invert, dict_params, dict_parinv)
+
+
+# Dictionnary for the transform
+dict_index_to_axis = dict([(0, "x"), (1, "y"), (2, "z")])
+
+# Add the necessary transformation to an object
+def transform_object(current_object, properties) :
+	current_transform = current_object.find("transform")
+	if current_transform == None : current_transform = create_obj(current_object, "transform", "toWorld")
+
+	# geomtranslat and geomrotat are to be applied before scaling
+	geomtranslat= [str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
+	geomrotat   = [str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if "GeometricRotation"    in properties else [])]
+	scaling     = [str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
+	rotation    = [str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if      "Lcl Rotation"    in properties else [])]
+	prerotation = [str2float2str(numb) for numb in (properties         ["PreRotation"][-3:] if          "PreRotation" in properties else [])]
+	translation = [str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
+
+	# Add infos to xml only if != 0 to make for a lighter and cleaner file
+	# For some reason, the prerotation must come after everything EXCEPT translation.
+	if geomtranslat != [] :
+		curr_translat2 = etree.SubElement(current_transform, "translate")
+		for i in range(3) :
+			curr_string = geomtranslat[i]
+			if float(curr_string) != 0 :
+				curr_translat2.set(dict_index_to_axis[i], geomtranslat[i])
+
+	if geomrotat != [] :
+		for i in range(3) :
+			curr_string = geomrotat[i]
+			if float(curr_string) != 0 :
+				curr_rotat = etree.SubElement(current_transform, "rotate")
+				curr_rotat.set(dict_index_to_axis[i], "1")
+				curr_rotat.set("angle", curr_string)
+
+	if scaling != [] :
+		curr_scale = etree.SubElement(current_transform, "scale")
+		for i in range(3) :
+			curr_string = scaling[i]
+			if float(curr_string) != 0 :
+				curr_scale.set(dict_index_to_axis[i], scaling[i])
+
+	if rotation != [] :
+		for i in range(3) :
+			curr_string = rotation[i]
+			if float(curr_string) != 0 :
+				curr_rotat = etree.SubElement(current_transform, "rotate")
+				curr_rotat.set(dict_index_to_axis[i], "1")
+				curr_rotat.set("angle", rotation[i])
+
+	if prerotation != [] :
+		for i in range(3) :
+			if prerotation[i].replace("-","") != "0" :
+				curr_prerotat = etree.SubElement(current_transform, "rotate")
+				curr_prerotat.set(dict_index_to_axis[i], "1")
+				curr_prerotat.set("angle", prerotation[i])
+
+	if translation != [] :
+		curr_translat = etree.SubElement(current_transform, "translate")
+		for i in range(3) :
+			curr_string = translation[i]
+			if float(curr_string) != 0 :
+				curr_translat.set(dict_index_to_axis[i], translation[i])
+
 
 
 # Create a xml with correct indentation
