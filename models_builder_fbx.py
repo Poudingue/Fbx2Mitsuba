@@ -26,8 +26,7 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 					prerotation = [tools.str2float2str(numb) for numb in (properties         ["PreRotation"][-3:] if          "PreRotation" in properties else [])]
 					translation = [tools.str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
 
-					curr_shape = etree.SubElement(root, "shape")
-					curr_shape.set("type", "instance") # To remove if the code below is used
+					curr_shape = tools.create_obj(root, "shape", "instance")# To remove if the code below is used
 
 					# Would work if mitsuba allowed nested instancing.
 					# Keep the code and use it if one day it is supported.
@@ -38,9 +37,7 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 						curr_shape.set("type", "shapegroup")
 					curr_shape.set("id", id)
 					"""
-
-					curr_trans = etree.SubElement(curr_shape, "transform")
-					curr_trans.set("name", "toWorld")
+					curr_trans = tools.create_obj(curr_shape, "transform", "toWorld")
 
 					# Add infos to xml only if != 0 to make for a lighter and cleaner file
 					# For some reason, the prerotation must come after everything EXCEPT translation.
@@ -88,7 +85,6 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 							curr_string = translation[i]
 							if float(curr_string) != 0 :
 								curr_translat.set(dict_index_to_axis[i], translation[i])
-
 
 					curr_ref = etree.SubElement(curr_shape, "ref")
 					curr_ref.set("id", link)

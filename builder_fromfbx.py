@@ -41,8 +41,7 @@ def build(fbxtree):
 	root.set("version", "0.5.0") # I have the documentation for mitsuba 0.5, so i create the scene for this version
 
 	# Set up the integrator. I chose pathtracing by default.
-	integrator = etree.SubElement(root, "integrator")
-	integrator.set("type", "path")
+	tools.create_obj(root, "integrator", "path")
 
 	# All the functions will directly add their elements to the root element
 	lightsandcameras_builder_fbx.build(root, nodes, models)

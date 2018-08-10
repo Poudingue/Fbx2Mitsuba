@@ -30,37 +30,16 @@ def build(root, textures, links_param_revert):
 		elif any(reference.lower().endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
 
 			textures_id[id] = reference
-
-			curr_texture = etree.SubElement(root, "texture")
-			curr_texture.set("type", "bitmap")
-			curr_texture.set("id", id)
-
-			reference_texture = etree.SubElement(curr_texture, "string")
-			reference_texture.set("name", "filename")
-			reference_texture.set("value", reference)
+			curr_texture = tools.create_obj(root, "texture", "bitmap", id)
+			tools.set_value(curr_texture, "string", "filename", reference)
 
 			# Avoid cluttering for the final file, removing 0 offsets and 1 scaling
-			# Does'nt seem to change when texture is scaled/tiled
-			if uoff != "0" :
-				uoffset = etree.SubElement(curr_texture, "float")
-				uoffset.set("name", "uoffset")
-				uoffset.set("value", uoff)
-
-			if voff != "0" :
-				voffset = etree.SubElement(curr_texture, "float")
-				voffset.set("name", "voffset")
-				voffset.set("value", voff)
-
-			if uscaling != "1" :
-				uscale = etree.SubElement(curr_texture, "float")
-				uscale.set("name", "uscale")
-				uscale.set("value", uscaling)
-
+			# Doesn't seem to change when texture is scaled/tiled in 3dsmax, TODO investigate
+			if uoff != "0"      : tools.set_value(curr_texture, "float", "uoffset", uoff)
+			if voff != "0"      : tools.set_value(curr_texture, "float", "voffset", voff)
+			if uscaling != "1"  : tools.set_value(curr_texture, "float", "uscale",  uscaling)
+			if vscaling != "-1" : tools.set_value(curr_texture, "float", "vscale",  str(-float(vscaling)))
 			# For some reason textures in 3dsmax have their v values inverted compared to mitsuba.
-			if vscaling != "-1" :
-				vscale = etree.SubElement(curr_texture, "float")
-				vscale.set("name", "vscale")
-				vscale.set("value", str(-float(vscaling)))
 
 		else :
 			print("Unknown texture file type : "+reference.split(".")[-1])

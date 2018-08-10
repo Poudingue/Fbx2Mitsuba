@@ -67,20 +67,21 @@ def build(root, nodes, models) :
 			rvb.append(str(intensity * float(color)))
 
 		if light_is_a_sphere :
-			light_shape = etree.SubElement(root, "shape")
-			light_shape.set("type", "sphere")
-			light_radius = etree.SubElement(light_shape, "float")
-			light_radius.set("name", "radius")
-			light_radius.set("value", str(sphere_radius))
+			light_shape = tools.create_obj(root, "shape", "sphere")
+			tools.set_value(light_shape, "float", "radius", str(sphere_radius))
 
-		light = etree.SubElement(light_shape if light_is_a_sphere else root, "emitter")
-		light.set("type", "area" if light_is_a_sphere else "point")
-		light_color = etree.SubElement(light, "spectrum")
-		light_color.set("name", "radiance" if light_is_a_sphere else "intensity")
-		light_color.set("value", " ".join(rvb))
+		light = tools.create_obj(
+			parent = light_shape if light_is_a_sphere else root,
+			object = "emitter",
+			type   = "area" if light_is_a_sphere else "point"
+		)
+		tools.set_value(light, "spectrum", "radiance", " ".join(rvb))
 
-		light_transform = etree.SubElement(light_shape if light_is_a_sphere else light, "transform")
-		light_transform.set("name","toWorld")
+		light_transform = tools.create_obj(
+			parent = light_shape if light_is_a_sphere else light,
+			object = "transform",
+			type   = "toWorld"
+		)
 
 		light_translate = etree.SubElement(light_transform if light_is_a_sphere else light_transform, "translate")
 		light_translate.set("x", str(light_pos[0]))
@@ -95,46 +96,29 @@ def build(root, nodes, models) :
 
 	for camera_node in camera_nodes :
 
-		curr_camera = etree.SubElement(root, "sensor")
+		curr_camera = tools.create_obj(root, "sensor", "perspective")
 		# by default it's gonna be perspective. TODO handle other types of camera
-		curr_camera.set("type", "perspective")
 
 		# Set up with nice default values. TODO parameters to control this
-		curr_film = etree.SubElement(curr_camera, "film")
-		curr_film.set("type", "hdrfilm")
-		curr_width = etree.SubElement(curr_film, "integer")
-		curr_width.set("name", "width")
-		curr_width.set("value", camera_node["AspectWidth"][-1])
+		curr_film = tools.create_obj(curr_camera, "film", "hdrfilm")
+		tools.set_value(curr_film, "integer",  "width", camera_node["AspectWidth"][-1])
+		tools.set_value(curr_film, "integer", "height", camera_node["AspectHeight"][-1])
 
-		curr_height = etree.SubElement(curr_film, "integer")
-		curr_height.set("name", "height")
-		curr_height.set("value", camera_node["AspectHeight"][-1])
-		rfilter = etree.SubElement(curr_film, "rfilter")
-		rfilter.set("type", "gaussian")
+		rfilter = tools.create_obj(curr_film, "rfilter", "gaussian")
 
 		# Set up with nice values. TODO parameters to control
-		curr_sampler = etree.SubElement(curr_camera, "sampler")
-		curr_sampler.set("type", "ldsampler")
-		sample_count = etree.SubElement(curr_sampler, "integer")
-		sample_count.set("name", "sampleCount")
-		sample_count.set("value", "64")
+		curr_sampler = tools.create_obj(curr_camera, "sampler", "ldsampler")
+		tools.set_value(curr_sampler, "integer", "sampleCount", "64")
 
 		# Go into transform
-		transf_camera = etree.SubElement(curr_camera, "transform")
-		transf_camera.set("name", "toWorld")
+		transf_camera = tools.create_obj(curr_camera, "transform", "toWorld")
 
 		lookat_camera = etree.SubElement(transf_camera, "lookat")
 		lookat_camera.set("origin", " ".join(camera_node["Position"][-3:]))
 		lookat_camera.set("target", " ".join(camera_node["InterestPosition"][-3:]))
 		lookat_camera.set("up",     " ".join(camera_node["UpVector"][-3:]))
 
-		camera_fov = etree.SubElement(curr_camera, "float")
-		camera_fov.set("name", "fov")
-		camera_fov.set("value", camera_node["FieldOfView"][-1])
-		# Max expresses the vertical fov
-		camera_fov_axis = etree.SubElement(curr_camera, "string")
-		camera_fov_axis.set("name", "fovAxis")
-		camera_fov_axis.set("value", "x")
-
+		tools.set_value(curr_camera, "float", "fov", camera_node["FieldOfView"][-1])
+		tools.set_value(curr_camera, "string", "fovAxis", "x")# Max expresses the horizontal fov
 
 	return

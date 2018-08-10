@@ -9,6 +9,20 @@ try :
 except ImportError:
 	pilimported = False
 
+missing = object()
+
+def set_value(parent, type, name, value) :
+	curr_elem = etree.SubElement(parent, type)
+	curr_elem.set("name", name)
+	curr_elem.set("id" if type in ["ref", "shapegroup"] else "value", value) # The can be an id
+	return curr_elem
+
+def create_obj(parent, object, type, id=missing) :
+	curr_elem = etree.SubElement(parent, object)
+	curr_elem.set("name" if object == "transform" else "type", type)
+	if id is not missing :
+		curr_elem.set("id", id)
+	return curr_elem
 
 # Open an image and make it compatible with roughness as Mitsuba suggests it :
 # No value above .5, and if this is a glossinness map, do an inversion (linear, it's what 3dsmax seems to be doing)

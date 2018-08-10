@@ -130,9 +130,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 			max_material  = max(materials)
 
 			# The shapegroup will contain all meshes with different materials, and allow instanciation
-			shapegroup = etree.SubElement(root, "shape")
-			shapegroup.set("type", "shapegroup")
-			shapegroup.set("id", id)
+			shapegroup = tools.create_obj(root, "shape", "shapegroup", id)
 
 			# Initialize
 			for i in range(max_material+1) :
@@ -191,21 +189,12 @@ property float32 v
 
 					for poly in poly_index : # Only triangles
 						output.write("3 "+" ".join(poly)+"\n")
-
-					shape = etree.SubElement(shapegroup, "shape")
-					shape.set("type", "ply")
-
-					importshape = etree.SubElement(shape, "string")
-					importshape.set("name", "filename")
-					importshape.set("value", "meshes/"+id+"_"+str(i)+".ply")
+					shape = tools.create_obj(shapegroup, "shape", "ply")
+					tools.set_value(shape, "string", "filename", "meshes/"+id+"_"+str(i)+".ply")
 
 					try :
-						curr_material = linked_materials[i]
-						curr_bsdf = etree.SubElement(shape, "ref")
-						curr_bsdf.set("name", "bsdf")
-						curr_bsdf.set("id", curr_material)
+						tools.set_value(shape, "ref", "bsdf", linked_materials[i])
 					except IndexError :
-						curr_material = 'null'
-						print("No material found for object "+id+", index "+str(i))
+						if config.verbose : print("No material found for object "+id+", index "+str(i))
 
 	return geometries_id

@@ -24,6 +24,7 @@ config.debug    = args.debug
 config.closest  = args.closest
 config.realist  = args.realist
 config.portable = args.portable
+config.distrib  = "ggx" if args.realist else "phong"# Artistic choice. Add parameter for direct control
 
 fbxtree = fbx2tree.transform()
 builder_fromfbx.build(fbxtree)
