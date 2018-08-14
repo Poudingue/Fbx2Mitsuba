@@ -9,7 +9,7 @@ def recursive_build_hierarchy(root, shapes_ids, object, links_simple, links_reve
 	if id in links_revert :
 		for parent_id in links_revert[id] :
 			current_object = deepcopy(object)
-			tools.transform_object(current_object, models_id[id])
+			tools.transform_object(current_object, models_id[id])# Prerotation only if parent is root
 			if parent_id == "0" :
 				root.append(current_object)
 			else :

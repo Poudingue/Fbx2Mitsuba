@@ -18,13 +18,12 @@ if args.closest and args.realist :
 	print("Incompatible options : --closest and --realist. Choose one, or neither for a balanced result")
 	exit(0)
 
-config.filename = "simplecube"# TODO Should be an argument
+config.filename = "scene"# TODO Should be an argument
 config.verbose  = args.verbose
 config.debug    = args.debug
 config.closest  = args.closest
 config.realist  = args.realist
 config.portable = args.portable
-config.distrib  = "ggx" if args.realist else "phong"# Artistic choice. Add parameter for direct control
 
 fbxtree = fbx2tree.transform()
 builder_fromfbx.build(fbxtree)

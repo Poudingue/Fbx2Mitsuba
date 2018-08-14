@@ -64,7 +64,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
 			# √(2/(α+2))
 			# But divided by 2, because mitsuba doesn't support higher roughness
-			roughness = 1./((float(shininess)+2.)) ** (.5) if shininess != "" else 0 # Very glossy material if no shininess found
+			roughness = .5 * (2./(float(shininess)+2.)) ** (.5) if shininess != "" else 0 # Very glossy material if no shininess found
 			curr_roughness = etree.Element("float")
 			curr_roughness.set("name", "alpha")
 			curr_roughness.set("value", str(roughness))

@@ -49,9 +49,9 @@ def roughness_convert(reference, invert) :
 	# Dither it ? There is a loss of precision with linear invert, with halving, and with conversion to Luminance (1 channel instead of 3)
 
 	if invert : # Linear inversion : -> convert to linear, invert, reconvert to perceptual
-		output = input.point(lambda px : int(.5* 255. * (1.-(float(px)/255.)**2.2)**(1./2.2))).convert("L")
+		output = input.point(lambda px : int(.5 * 255. * (1.-(float(px)/255.)**(2.2))**(1./2.2))).convert("L")
 	else :
-		output = input.point(lambda px : .5*px).convert("L")
+		output = input.point(lambda px : int(.5 * 255. * (float(px)/255.))).convert("L")
 
 	if not os.path.exists("converted_textures") :
 		os.makedirs("converted_textures")
@@ -92,6 +92,7 @@ def getProperties(object) :
 # But this is not a normalized rgb value like in 3dsmax
 
 # Based on this blog post : https://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
+# It doesn't seem to match 3dsmax scale for kelvin color
 # Will maybe implement something more accurate later (full spectrum instead of rgb ??? Mitsuba has spectral rendering)
 # More info on blackbodies : https://en.wikipedia.org/wiki/Color_temperature
 def kelvin2rgb(kelvin) :
@@ -99,7 +100,8 @@ def kelvin2rgb(kelvin) :
 	if kelvin < 1000 or kelvin > 40000 :
 		print("Kelvin values should be between 1 000 and 40 000, the value will be clamped to match these limits")
 	kelvin = clamp(kelvin, 1000, 40000) #Clamp value
-	kelvin *= .01 #Divide by 100 to deal with smaller numbers
+	kelvin *= .01 # Divide by 100 to deal with smaller numbers
+	kelvin *= .8  # Correction to match real colors obtained
 
 	red = 255. if kelvin <= 66 else clamp(329.698727446 * (kelvin - 60) ** -.1332047592 ,0, 255)
 
