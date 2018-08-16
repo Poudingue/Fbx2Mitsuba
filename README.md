@@ -31,13 +31,20 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 ### Should be fixed soon
 
-- Other cameras
+- Physical cameras
+- Other photometric lights
 - Background color/light
+- Tiling
+- Materials :
+	- Anisotropy
+	- Subsurface scattering
+	- Multilayer materials
 - Some bumpmap seem to be referencing other textures. Investigate.
 
 ### Harder to fix, will try anyway
 
-- Other light types are not included
+- Other light types
+- Other cameras
 
 ### Probably unfixable
 
