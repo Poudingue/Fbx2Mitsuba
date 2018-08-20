@@ -2,6 +2,7 @@ import os
 from io import StringIO
 import math
 import config
+import random
 import xml.etree.ElementTree as etree
 try :
 	from PIL import Image
@@ -46,12 +47,14 @@ def roughness_convert(reference, invert) :
 	input = Image.open(reference)# Convert to luminance
 	filename = reference.replace("\\","/").split("/")[-1]
 
-	# Dither it ? There is a loss of precision with linear invert, with halving, and with conversion to Luminance (1 channel instead of 3)
+	# Dither it ? There is a loss of precision with halving and reconverting to 8bit channels
+	# With simple random function, it does'nt work, the lambda seem to work by blocks in the image.
+	# Random depending on the pixel coordinates should work
 
 	if invert : # Linear inversion : -> convert to linear, invert, reconvert to perceptual
-		output = input.point(lambda px : int(.5 * 255. * (1.-(float(px)/255.)**(2.2))**(1./2.2))).convert("L")
+		output = input.point(lambda px : int(.5 * 255. * (1.-(float(px)/255.)**(2.2))**(1./2.2)))
 	else :
-		output = input.point(lambda px : int(.5 * 255. * (float(px)/255.))).convert("L")
+		output = input.point(lambda px : int(.5 * 255. * (float(px)/255.)))
 
 	if not os.path.exists("converted_textures") :
 		os.makedirs("converted_textures")
