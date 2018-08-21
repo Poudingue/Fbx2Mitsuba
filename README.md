@@ -1,10 +1,10 @@
 # Fbx2Mitsuba
 
-A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
+A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 
 ## Howto
 
-- export the 3dsmax scene to “scene.fbx” (ascii fbx, not binary !)
+- export the 3ds Max scene to “scene.fbx” (ascii fbx, not binary !)
 - install python 3.7 if you don't have it already
 - install Pillow for Python (used for roughness map conversion)
 - use converter.py (double click on it if you don't know how)
@@ -18,9 +18,9 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 ## What will be converted
 
 - Target cameras
-- Positions, colors and intensity of photometric pointlights (sphere lights correctly taken into account)
+- Photometric pointlights (sphere lights correctly taken into account)
 - Meshes (separated by material for a single 3d object)
-	- Hierarchy of objects will be lost, but their placement should be ok now
+	- Hierarchy of objects will be lost, but their placement should be correct
 - Materials : Should work pretty well with 3dsmax's “physical” materials.
 	- Metalness should work properly, with specular color based on diffuse
 	- Transparency should work properly, with correct IOR and colored specular transmittance
@@ -70,17 +70,19 @@ A converter from fbx (3dsmax exported scenes) to mitsuba renderer scenes.
 
 ## Roadmap
 
+- Support physical cameras
+- Support other photometric lights
 - Shorten and simplify code
+- Ensure compatibility for other machines
+- Simplify user experience
 - Increase the number of supported materials
 - More parameters
-- More type of lights support
-- More cameras support
-- Texture tiling support
+- Texture tiling
 - Catch more potential problem with fbx file infos
 
 ## Copyright and stuff
 
-The source code is intended to be viewed with a 4 space indentation
+The source code is intended to be viewed with 4 space indentation
 Please understand that this is an experimental ongoing project, some unexpected problems might occur.
 
 Right now, you can use my (unfinished) work, but i'm not responsible if anything goes wrong.
