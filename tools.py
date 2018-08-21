@@ -207,7 +207,7 @@ def transform_object(current_object, properties) :
 
 	if prerotation != [] :
 		for i in range(3) :
-			if float(prerotation[i]) != "0" :
+			if float(prerotation[i]) != 0 :
 				curr_prerotat = etree.SubElement(current_transform, "rotate")
 				curr_prerotat.set(dict_index_to_axis[i], "1")
 				curr_prerotat.set("angle", prerotation[i])

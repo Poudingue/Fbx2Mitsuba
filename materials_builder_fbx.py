@@ -23,11 +23,14 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 		if ("3dsMax|Parameters|bump_map_on" in properties # Bump map
 			and properties["3dsMax|Parameters|bump_map_on"][-1] == "1"
 			and "3dsMax|Parameters|bump_map" in linked) :# Use bump map
-
+			scale = properties["3dsMax|Parameters|bump_map_amt"][-1]
 			curr_bumpmod = tools.create_obj(root, "bsdf", "bumpmap", id)
-			curr_bumpmap = tools.create_obj(curr_bumpmod, "texture", "scale")
-			tools.set_value(curr_bumpmap, "float", "scale", properties["3dsMax|Parameters|bump_map_amt"][-1])
-			tools.set_ref(curr_bumpmap, linked["3dsMax|Parameters|bump_map"])
+			if scale != "1" :
+				curr_bumpmap = tools.create_obj(curr_bumpmod, "texture", "scale")
+				tools.set_value(curr_bumpmap, "float", "scale", scale)
+				tools.set_ref(curr_bumpmap, linked["3dsMax|Parameters|bump_map"])
+			else :
+				tools.set_ref(curr_bumpmod, linked["3dsMax|Parameters|bump_map"])
 
 			curr_material = etree.SubElement(curr_bumpmod, "bsdf")
 		else :
@@ -36,7 +39,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 
 		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
 					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse
-		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else ""
+		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1 1 1"
 		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
 
 		# Roughness
@@ -109,8 +112,9 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 				tools.set_value(curr_metal, "ref", "specularReflectance", linked["DiffuseColor"])
 			elif "3dsMax|Parameters|base_color_map" in linked :
 				tools.set_value(curr_metal, "ref", "specularReflectance", linked["3dsMax|Parameters|base_color_map"])
-			else :
+			elif diffuse_color != "1 1 1":
 				tools.set_value(curr_metal, "spectrum", "specularReflectance", diffuse_color)
+			# else it's the default of 1 1 1
 
 			# Non-metal part of the material
 			if metalness < 1 : curr_material = etree.SubElement(curr_material, "bsdf")
@@ -131,10 +135,10 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			else :
 				tools.set_value(curr_material, "spectrum", "diffuseReflectance", diffuse_color)
 
-			if specular_color != "" : # Set up only if there is such a color
+			if specular_color is not "1 1 1" : # Set up only if there is such a color
 				curr_spec_color = etree.SubElement(curr_material, "spectrum")
 				curr_spec_color.set("name", "specularReflectance")
-				curr_spec_color.set("value", " ".join(str(color) for color in specular_color.split(" ")))
+				curr_spec_color.set("value", specular_color)
 
 			if "3dsMax|Parameters|coat_ior" in properties :
 				ior = properties["3dsMax|Parameters|coat_ior"][-1]
