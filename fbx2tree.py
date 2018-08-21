@@ -4,59 +4,55 @@ import config
 import xml.etree.ElementTree as etree
 
 def transform() :
-	filename = config.filename
-	verbose  = config.verbose
-	debug    = config.debug
+	filename, verbose, debug = config.filename, config.verbose, config.debug
 
 	if verbose : print("fbx2tree launched…")
 	root = etree.Element("root")
-	parents = []
+	parents = [] # Store a list of current parents
+
 	current_elem = root
 	inputfile = open(filename+".fbx", encoding="utf8")
 	if verbose : print("file openened")
 
 	for line in inputfile :
-		line = line.replace("\"","")
-		# print(line)
-		# Comments in the fbx can give useful informations
-		reg_comment = re.match(";(.*)", line.strip())
-		#
-		reg_opening = re.match("([A-Za-z0-9_]+):(.*) *{", line.strip())
-		reg_info = re.match("([A-Za-z0-9_]+): *(.*)", line.strip())
-		if "}" in line :
+		line = line.replace("\"","").strip()
+		reg_comment = re.match(";(.*)", line)					# This regex corresponds to comments
+		reg_opening = re.match("([A-Za-z0-9_]+):(.*) *{", line) # This regex corresponds to a new child
+		reg_info = re.match("([A-Za-z0-9_]+): *(.*)", line)		# This regex corresponds to infos for the current child
+
+		if line.endswith("}") :									# This is the end of the current element, go back to the parent.
 			current_elem = parents.pop()
-		elif len(line.strip()) == 0 :
+
+		elif len(line.strip()) == 0 :							# Empty line, simply ignore
 			pass
-		elif reg_comment!=None :
-			comment = etree.SubElement(current_elem, "comment")
+
+		elif reg_comment != None :								# Comment, just create an element named comment.
+			comment      = etree.SubElement(current_elem, "comment")
 			comment.text = reg_comment[1]
-		elif reg_opening!=None :
+
+		elif reg_opening != None :								# New child, remember the parrent, and create the new child.
 			parents.append(current_elem)
 			current_elem = etree.SubElement(current_elem, reg_opening[1].replace(" ","").replace(":",""))
-			current_elem.set("value",reg_opening[2].strip())
-		elif reg_info!=None :
-			moretext = ""
-			if reg_info[2].endswith(",") :
+			current_elem.set("value",reg_opening[2].strip())	# Potential complementary infos
+
+		elif reg_info != None :									# Infos for the current child,
+			onemoreline = moretext = reg_info[2]
+			while onemoreline.endswith(",") :					# For multiline infos, such as vertex list
 				onemoreline = inputfile.readline().strip()
-				if "}" in onemoreline :
-					current_elem = parents.pop()
-				else :
-					moretext+=onemoreline
-			while moretext.endswith(",") :
-				onemoreline = inputfile.readline().strip()
-				if "}" in onemoreline :
+				if onemoreline.endswith("}") :
 					current_elem = parents.pop()
 				else :
 					moretext+=onemoreline
 			elem = etree.SubElement(current_elem, reg_info[1])
-			elem.text = reg_info[2] + moretext
-		else :
-			print("unknown : "+line)
+			elem.text = moretext
+
+		else :													# Unrecognized line. Should'nt happen, it's in case something was not taken into account.
+			print("fbx2tree encountered an unknown line :\n"+line)
 			stuff = etree.SubElement(current_elem, "stuff")
 			stuff.text = line
 	inputfile.close()
 
-	if parents != [] :
+	if parents != [] :											# Should'nt happen if the FBX and the interpretation is correct.
 		print("PARENTS LIST NOT EMPTY")
 		print(parents)
 		exit(1)
@@ -64,7 +60,7 @@ def transform() :
 	if verbose : print ("Building tree")
 	tree = etree.ElementTree(root)
 
-	if debug :
+	if debug :													# Export the tree to xml for debug purposes.
 		if verbose : print("writing file")
 		with open(filename+"_fbx.xml", "w", encoding="utf8") as outputfile :
 			if verbose : print("prettifying… (Can take a while for big files)")
@@ -72,5 +68,6 @@ def transform() :
 			pretty = tools.prettifyXml(stringout)
 			if verbose : print("writing…")
 			outputfile.write(pretty)
+
 	if verbose : print("fbx2tree ended")
 	return tree

@@ -17,10 +17,10 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 
 		# Get linked parameters (only textures ?)
 		linked = links_param[id] if id in links_param else []
-		shading = material.find("ShadingModel").text
 		properties = tools.getProperties(material)
 
-		if ("3dsMax|Parameters|bump_map_on" in properties
+		# If bumpmap is on, use it
+		if ("3dsMax|Parameters|bump_map_on" in properties # Bump map
 			and properties["3dsMax|Parameters|bump_map_on"][-1] == "1"
 			and "3dsMax|Parameters|bump_map" in linked) :# Use bump map
 
@@ -35,7 +35,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_material.set("id", id)
 
 		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
-					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "")) #Use red if there is no diffuse
+					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse
 		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else ""
 		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
 
@@ -64,7 +64,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
 			# √(2/(α+2))
 			# But divided by 2, because mitsuba doesn't support higher roughness
-			roughness = .5 * (2./(float(shininess)+2.)) ** (.5) if shininess != "" else 0 # Very glossy material if no shininess found
+			roughness = .5 * (2./(float(shininess)+2.)) ** (.5)
 			curr_roughness = etree.Element("float")
 			curr_roughness.set("name", "alpha")
 			curr_roughness.set("value", str(roughness))

@@ -4,6 +4,7 @@ import math
 import config
 import random
 import xml.etree.ElementTree as etree
+
 try :
 	from PIL import Image
 	pilimported = True
@@ -12,17 +13,23 @@ except ImportError:
 
 missing = object()
 
+
+# To set a value in the format Mitsuba Renderer expects
 def set_value(parent, type, name, value) :
 	curr_elem = etree.SubElement(parent, type)
 	curr_elem.set("name", name)
 	curr_elem.set("id" if type in ["ref", "shapegroup"] else "value", value) # The can be an id
 	return curr_elem # In case we need it somewhere
 
+
+# To set a reference in the format Mitsuba Renderer expects
 def set_ref(parent, id) :
 	curr_ref = etree.SubElement(parent, "ref")
 	curr_ref.set("id", id)
-	return curr_ref # In case we need it somewhere
+	return curr_ref
 
+
+# To create an object in the format Mitsuba Renderer expects. id is optionnal, useful for later referencing
 def create_obj(parent, object, type, id=missing) :
 	curr_elem = etree.SubElement(parent, object)
 	curr_elem.set("name" if object == "transform" else "type", type)
@@ -30,12 +37,15 @@ def create_obj(parent, object, type, id=missing) :
 		curr_elem.set("id", id)
 	return curr_elem
 
+
+# To create an object without parents in the format Mitsuba Renderer expects. id is optionnal, useful for later referencing
 def new_obj(object, type, id=missing) :
 	curr_elem = etree.Element(object)
 	curr_elem.set("type", type)
 	if id is not missing :
 		curr_elem.set("id", id)
 	return curr_elem
+
 
 # Open an image and make it compatible with roughness as Mitsuba suggests it :
 # No value above .5, and if this is a glossinness map, do an inversion (linear, it's what 3dsmax seems to be doing)
@@ -49,7 +59,7 @@ def roughness_convert(reference, invert) :
 
 	# Dither it ? There is a loss of precision with halving and reconverting to 8bit channels
 	# With simple random function, it does'nt work, the lambda seem to work by blocks in the image.
-	# Random depending on the pixel coordinates should work
+	# Random with pixel coordinates as seed should work
 
 	if invert : # Linear inversion : -> convert to linear, invert, reconvert to perceptual
 		output = input.point(lambda px : int(.5 * 255. * (1.-(float(px)/255.)**(2.2))**(1./2.2)))
@@ -151,7 +161,7 @@ def extract_links(links) :
 # Dictionnary for the transform
 dict_index_to_axis = dict([(0, "x"), (1, "y"), (2, "z")])
 
-# Add the necessary transformation to an object
+# Add the necessary transformation to an object using the properties
 def transform_object(current_object, properties) :
 	current_transform = current_object.find("transform")
 	if current_transform == None : current_transform = create_obj(current_object, "transform", "toWorld")
@@ -165,7 +175,6 @@ def transform_object(current_object, properties) :
 	translation = [str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
 
 	# Add infos to xml only if != 0 to make for a lighter and cleaner file
-	# For some reason, the prerotation must come after everything EXCEPT translation.
 	if geomtranslat != [] :
 		curr_translat2 = etree.SubElement(current_transform, "translate")
 		for i in range(3) :
@@ -198,7 +207,7 @@ def transform_object(current_object, properties) :
 
 	if prerotation != [] :
 		for i in range(3) :
-			if prerotation[i].replace("-","") != "0" :
+			if float(prerotation[i]) != "0" :
 				curr_prerotat = etree.SubElement(current_transform, "rotate")
 				curr_prerotat.set(dict_index_to_axis[i], "1")
 				curr_prerotat.set("angle", prerotation[i])
@@ -211,32 +220,30 @@ def transform_object(current_object, properties) :
 				curr_translat.set(dict_index_to_axis[i], translation[i])
 
 
-
 # Create a xml with correct indentation
 # uglyxml must be a string
-# /!\ can be changed to a tree as an argument for more efficient processing
+# /!\ NOT EFFICIENT FOR HUGE TREES
 def prettifyXml(uglyxml) :
 	# This is a faster solution if it takes too long, but it's ugly with no indentation,
 	# so use only for debug purposes or if the xml creation takes too long :
-	# return uglyxml.replace(">", ">\n")
+	""" return uglyxml.replace(">", ">\n") """
 
 	multiline = uglyxml.replace(">", ">\n").replace("<","\n<").split("\n")
 	out = ""
 	curr_indent = 0
 	intext = False # To avoid indenting after a text
 	for line in multiline :
-		if line == "" :
-			pass
+		if line == "" : pass
 		elif line.startswith("<") and line.endswith(">") :
 			if line.startswith("</") :
 				curr_indent-=1
-				out+=("" if intext else curr_indent*"\t")+line+"\n"
+				out += ("" if intext else curr_indent*"\t")+line+"\n"
 				intext = False
 			elif line.endswith("/>") or line.startswith("<!") :
 				# one-line tag or comment. don't add indentation
-				out+=curr_indent*"\t"+line+"\n"
+				out += curr_indent*"\t"+line+"\n"
 			else :
-				out+=curr_indent*"\t"+line+"\n"
+				out += curr_indent*"\t"+line+"\n"
 				curr_indent+=1
 		else :
 			out = out[:-1] + line#Remove the \n from last line and add the text

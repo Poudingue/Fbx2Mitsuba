@@ -7,10 +7,10 @@ import xml.etree.ElementTree as etree
 # Useful to retrieve the transform from all the hierarchy of the scene.
 def recursive_build_hierarchy(root, shapes_ids, object, links_simple, links_revert, models_id, id) :
 	if id in links_revert :
-		for parent_id in links_revert[id] :
+		for parent_id in links_revert[id] : # If multiple parents, multiple instances of the object must be created.
 			current_object = deepcopy(object)
-			tools.transform_object(current_object, models_id[id])# Prerotation only if parent is root
-			if parent_id == "0" :
+			tools.transform_object(current_object, models_id[id])
+			if parent_id == "0" : # End recursion and add the transformation
 				root.append(current_object)
 			else :
 				recursive_build_hierarchy(root, shapes_ids, current_object, links_simple, links_revert, models_id, parent_id)
@@ -22,6 +22,7 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 	comment = etree.Comment("Models.")
 	root.append(comment)
 
+	# Create a dictionnary of models to pass through every parent
 	models_id = {}
 	for model in models :
 		id, type, obj = model.get("value").replace("::","").split(",")

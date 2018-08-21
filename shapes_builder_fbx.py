@@ -35,7 +35,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 				linked_materials = []
 			linked_materials = [link for link in linked_materials if link in materials_ids] #Only keep ids of materials
 			# I think that the index for materials is based on the order they appear in the file
-			# Maybe not, but i see no other info in the fbx to know that.
+			# Maybe not, but i see no other info in the fbx to know that, so that's what i use and it seems to work
 
 			vertices_data = geometry.find("Vertices")
 			nb_vertices = int(vertices_data.get("value").replace("*",""))
@@ -99,7 +99,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 						normals.append(normals_in[3*i : 3*i+3])
 				elif normal_type == "IndexToDirect" :
 					# TODO
-					print("NORMAL INDEXTODIRECT TO DO")
+					print("NORMAL INDEXTODIRECT DOESN'T WORK RIGHT NOW")
 				else :
 					print("Unknown ReferenceInformationType for normal in obj "+id)
 			else :
@@ -156,7 +156,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 							vertex_text.append(curr_vertex_text)
 						curr_polygon_vertex_num += 1
 
-					# Generate multiple triangle to replace polygons (not supported by mitsuba)
+					# Generate multiple triangle to replace polygons (not supported by Mitsuba Renderer)
 					if len(curr_poly_index) > 3 :
 						for k in range(len(curr_poly_index)-2) :
 							curr_poly = [curr_poly_index[0]]+curr_poly_index[k+1:k+3]
@@ -164,8 +164,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 					elif len(curr_poly_index) > 0 :
 						poly_index.append(curr_poly_index)
 
-				if len(vertex_text)!=0 :# Export only non-empty objects
-
+				if vertex_text != [] : # Export only non-empty objects
 					output = open("meshes/"+id+"_"+str(i)+".ply", "w")
 					output.write("ply\n")
 					output.write("format ascii 1.0\n")

@@ -22,6 +22,8 @@ def build(fbxtree):
 	videos    = objects.findall("Video") # Not sure about what it contains, it seems to be a duplicate of “textures”. Maybe for compatibility reasons ?
 	textures  = objects.findall("Texture")
 
+	# Unused part of the code, for now. Keep just in case
+	"""
 	# Animation. Will probably not be usable
 	anim_c_n  = objects.findall("AnimationCurveNode")
 	anim_c    = objects.findall("AnimationCurve")
@@ -30,6 +32,7 @@ def build(fbxtree):
 	implem    = objects.find("Implementation")
 	bind_table= objects.find("BindingTable")
 	bind_oper = objects.find("BindingOperator")
+	"""
 
 	# Useful to link objects, textures to materials, materials to models, and geometry to models.
 	connections_list = fbxtree.find("Connections")
@@ -38,9 +41,9 @@ def build(fbxtree):
 	links_simple, links_revert, links_param, links_param_revert = tools.extract_links(links)
 
 	root = etree.Element("scene")
-	root.set("version", "0.5.0") # I have the documentation for mitsuba 0.5, so i create the scene for this version
+	root.set("version", "0.5.0")
 
-	# Set up the integrator. I chose pathtracing by default.
+	# Set up the integrator. I chose pathtracing by default TODO add as a parameter
 	tools.create_obj(root, "integrator", "path")
 
 	# All the functions will directly add their elements to the root element

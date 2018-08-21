@@ -6,7 +6,6 @@ import xml.etree.ElementTree as etree
 def build(root, nodes, models) :
 	verbose = config.verbose
 	debug   = config.debug
-
 	if verbose : print("lightsandcameras_builder_fbx launched")
 
 	comment = etree.Comment("Lights and cameras")
@@ -25,7 +24,6 @@ def build(root, nodes, models) :
 			light_nodes.append(properties)
 
 	camera_models, light_models = [], []
-
 	for model in models :
 		id, type, obj = model.get("value").replace("::","").split(", ")
 		properties = tools.getProperties(model)
@@ -35,8 +33,8 @@ def build(root, nodes, models) :
 			camera_models.append(properties)
 		elif obj == "Light" :
 			light_models.append(properties)
-	# Handle lights
 
+	# Handle lights
 	if len(light_nodes) != len(light_models) :
 		print("nb of light nodes and light models not the same")
 		exit(0)
@@ -44,21 +42,21 @@ def build(root, nodes, models) :
 	for i in range(len(light_nodes)) :
 		light_node, light_model = light_nodes[i], light_models[i]
 
-		if "3dsMax|FSphereExtParameters|light_radius" in light_node :
+		if "3dsMax|FSphereExtParameters|light_radius" in light_node : # This parameter means that the light is a sphere
 			light_is_a_sphere = True
 			sphere_radius = float(light_node["3dsMax|FSphereExtParameters|light_radius"][-1])
-		else :
-			light_is_a_sphere = False
+		else : light_is_a_sphere = False
 
-		if "3dsMax|FAreaParameters" in light_node :
-			print("Area lights not supported, light with id "+id+"will be considered as a point light")
+		if "3dsMax|FAreaParameters" in light_node : #TODO area lights
+			print("Area lights not supported yet, light with id "+id+"will be considered as a point light for now")
 			colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
-		elif light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|useKelvin"][-1] == "1" :
+		elif light_node["3dsMax|"+("F"+("Sphere" if light_is_a_sphere else "Point")+"Parameters")+"|useKelvin"][-1] == "1" :
 			colors = tools.kelvin2rgb(float(light_node["3dsMax|"+("FSphereParameters"if light_is_a_sphere else "FPointParameters")+"|kelvin"][-1]))
+			# TODO color filter
 		else :
 			colors = light_node["Color"][-3:] if "Color" in light_node else ["1"]
 
-		# Divide intensity by apparent surface of the sphere if it's not a point
+		# Divide intensity by apparent surface of the sphere (disc) if it's not a point
 		intensity = float(light_node["Intensity"][-1])/(2.*math.pi*sphere_radius**2. if light_is_a_sphere else 1)
 		rvb = []
 		for color in colors :
@@ -79,13 +77,10 @@ def build(root, nodes, models) :
 		tools.transform_object(light_shape if light_is_a_sphere else light, light_model)
 
 	# Handle cameras
-
 	if len(camera_nodes) != len(camera_models) :
 		print("nb of camera nodes and camera models not the same")
-		exit(0)
 
 	for camera_node in camera_nodes :
-
 		curr_camera = tools.create_obj(root, "sensor", "perspective")
 		# by default it's gonna be perspective. TODO handle other types of camera
 
@@ -94,9 +89,9 @@ def build(root, nodes, models) :
 		tools.set_value(curr_film, "integer",  "width", camera_node["AspectWidth"][-1])
 		tools.set_value(curr_film, "integer", "height", camera_node["AspectHeight"][-1])
 
-		rfilter = tools.create_obj(curr_film, "rfilter", "gaussian")
+		rfilter = tools.create_obj(curr_film, "rfilter", "box")
 
-		# Set up with nice values. TODO parameters to control
+		# Set up with nice values. TODO parameters to control this
 		curr_sampler = tools.create_obj(curr_camera, "sampler", "ldsampler")
 		tools.set_value(curr_sampler, "integer", "sampleCount", "64")
 
