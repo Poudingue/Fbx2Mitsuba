@@ -61,8 +61,9 @@ def roughness_convert(reference, invert) :
 	# With simple random function, it does'nt work, the lambda seem to work by blocks in the image.
 	# Random with pixel coordinates as seed should work
 
-	if invert : # Linear inversion : -> convert to linear, invert, reconvert to perceptual
-		output = input.point(lambda px : int(.5 * 255. * (1.-(float(px)/255.)**(2.2))**(1./2.2)))
+	if invert : # Linear inversion : -> convert to linear, invert , reconvert to perceptual
+		# This is normal if i use 254 instead of 255, this is to ensure that the smoothest surfaces give a pitch black roughness, instead of the greyish tone caused by the float approximation
+		output = input.point(lambda px : int(.5 * 255. * (max(0, 1 - (float(px)/254.)**(2.2)))**(1./2.2)))
 	else :
 		output = input.point(lambda px : int(.5 * 255. * (float(px)/255.)))
 

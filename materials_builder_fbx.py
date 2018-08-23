@@ -39,7 +39,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 
 		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
 					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse, for debug
-		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1"
+		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1 1 1"
 		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
 
 		# Roughness
@@ -135,7 +135,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			else :
 				tools.set_value(curr_material, "spectrum", "diffuseReflectance", diffuse_color)
 
-			if specular_color is not "1 1 1" : # Set up only if there is such a color
+			if specular_color != "1 1 1" : # Set up only if there is such a color
 				curr_spec_color = etree.SubElement(curr_material, "spectrum")
 				curr_spec_color.set("name", "specularReflectance")
 				curr_spec_color.set("value", specular_color)

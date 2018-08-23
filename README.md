@@ -64,6 +64,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 - every material is referenced with a unique id, and can use textures id
 - every 3d object create a shapegroup, containing all the geometry, with a unique id
 	- if an object has multiple materials applied to it, it will create a separate mesh for each one
+	- materials are called by their ids
 - every object placed on the scene create a shape, referencing shapegroups, correctly placed, scaled and rotated.
 - meshes are stored in their respective folder
 - everything is written in the “scene.xml” file, except for meshes, staying in their respective folder
