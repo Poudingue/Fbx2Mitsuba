@@ -38,8 +38,8 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_material.set("id", id)
 
 		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
-					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse
-		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1 1 1"
+					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse, for debug
+		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1"
 		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
 
 		# Roughness

@@ -1,6 +1,6 @@
 import os
 import tools
-import lightsandcameras_builder_fbx
+import light_cam_builder_fbx
 import textures_builder_fbx
 import materials_builder_fbx
 import shapes_builder_fbx
@@ -12,6 +12,9 @@ def build(fbxtree):
 	verbose = config.verbose
 	if verbose : print("builder_fromfbx launched")
 
+	globalsettings = tools.getProperties(fbxtree.find("GlobalSettings"))
+	config.upvector = "0 1 0" if globalsettings["UpAxis"][-1] == "1" else "0 0 1"
+
 	objects = fbxtree.find("Objects")
 
 	# Separate objects into different categories
@@ -21,6 +24,7 @@ def build(fbxtree):
 	nodes     = objects.findall("NodeAttribute") # Include cameras and lights
 	videos    = objects.findall("Video") # Not sure about what it contains, it seems to be a duplicate of “textures”. Maybe for compatibility reasons ?
 	textures  = objects.findall("Texture")
+	nulls     = objects.findall("Null") # Useful for cameras and spot targets
 
 	# Unused part of the code, for now. Keep just in case
 	"""
@@ -47,7 +51,7 @@ def build(fbxtree):
 	tools.create_obj(root, "integrator", "path")
 
 	# All the functions will directly add their elements to the root element
-	lightsandcameras_builder_fbx.build(root, nodes, models)
+	light_cam_ids = light_cam_builder_fbx.build(root, nodes, models, nulls)
 	textures_id   =  textures_builder_fbx.build(root, textures, links_param_revert)
 	materials_ids = materials_builder_fbx.build(root, materials, textures_id, links_param, links_param_revert)
 	shapes_ids    =    shapes_builder_fbx.build(root, geometries, materials_ids, links_simple, links_revert)

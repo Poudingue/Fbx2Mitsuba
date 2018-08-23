@@ -161,12 +161,29 @@ def extract_links(links) :
 # Dictionnary for the transform
 dict_index_to_axis = dict([(0, "x"), (1, "y"), (2, "z")])
 
+def transform_lookat(current_object, origin, target, up=missing) :
+	current_transform = current_object.find("transform")
+	if current_transform == None : current_transform = create_obj(current_object, "transform", "toWorld")
+	curr_lookat = etree.SubElement(current_transform, "lookat")
+	curr_lookat.set("origin", origin)
+	curr_lookat.set("target", target)
+	if up is not missing : curr_lookat.set("up", up)
+
+def transform_lookat_from_properties(current_object, properties) :
+	transform_lookat(
+		current_object,
+		" ".join(properties["Position"][-3:]),
+		" ".join(properties["InterestPosition"][-3:]),
+		" ".join(properties["UpVector"][-3:]) if "UpVector" in properties else missing
+	)
+
 # Add the necessary transformation to an object using the properties
 def transform_object(current_object, properties) :
 	current_transform = current_object.find("transform")
 	if current_transform == None : current_transform = create_obj(current_object, "transform", "toWorld")
 
 	# geomtranslat and geomrotat are to be applied before scaling
+	postrotation= [str2float2str(numb) for numb in (properties        ["PostRotation"][-3:] if         "PostRotation" in properties else [])] # Useful ?
 	geomtranslat= [str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
 	geomrotat   = [str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if "GeometricRotation"    in properties else [])]
 	scaling     = [str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
@@ -218,6 +235,9 @@ def transform_object(current_object, properties) :
 			curr_string = translation[i]
 			if float(curr_string) != 0 :
 				curr_translat.set(dict_index_to_axis[i], translation[i])
+
+
+
 
 
 # Create a xml with correct indentation
