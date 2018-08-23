@@ -4,10 +4,10 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 
 ## Howto
 
-- export the 3ds Max scene to “scene.fbx” (ascii fbx, not binary !)
+- export the 3ds Max scene in the fbx format (ascii fbx, not binary !)
 - install python 3.7 if you don't have it already
 - install Pillow for Python (used for roughness map conversion)
-- use converter.py (double click on it if you don't know how)
+- use converter.py with your fbx file as a parameter (you can drag and drop the fbx on converter.py)
 - available commands :
 	- --verbose (or -v) displays more info about conversion
 	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a very long time for big files⚠️
@@ -18,7 +18,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 ## What will be converted
 
 - Target cameras
-- Photometric pointlights (sphere lights correctly taken into account)
+- Photometric pointlights (sphere lights correctly taken into account) and spotlights
 - Meshes (separated by material for a single 3d object)
 	- Hierarchy of objects will be lost, but their placement should be correct
 - Materials : Should work pretty well with 3dsmax's “physical” materials.
@@ -26,6 +26,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 	- Transparency should work properly, with correct IOR and colored specular transmittance
 - Textures should work for diffuse, roughness and bumpmapping, with uv mapping.
 	- If a texture reference is not found, the texture will be replaced with a default error texture
+	- Tiling should work properly
 
 ## What won't be converted
 
@@ -34,7 +35,6 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 - Physical cameras
 - Other photometric lights
 - Background color/light
-- Tiling
 - Materials :
 	- Anisotropy
 	- Subsurface scattering
@@ -71,13 +71,13 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 ## Roadmap
 
 - Support physical cameras
-- Support other photometric lights
 - Shorten and simplify code
 - Ensure compatibility for other machines
+- Make a more complete “portable” option, putting everything in a single folder
 - Simplify user experience
+- Documentation for users and developpers
 - Increase the number of supported materials
 - More parameters
-- Texture tiling
 - Catch more potential problem with fbx file infos
 
 ## Copyright and stuff

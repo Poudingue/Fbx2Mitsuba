@@ -3,7 +3,7 @@ import tools
 import config
 import xml.etree.ElementTree as etree
 
-def build(root, nodes, models, nulls) :
+def build(root, nodes, models, nulls, links_simple, links_param) :
 	verbose = config.verbose
 	debug   = config.debug
 	if verbose : print("lightsandcameras_builder_fbx launched")
@@ -14,40 +14,38 @@ def build(root, nodes, models, nulls) :
 	# Cameras and spotlight are very similar.
 
 	# Prepare nodes and models properties for easy access
-	camera_nodes, light_nodes = [], []
+	camera_nodes, light_nodes = {}, {}
 	for node in nodes :
 		id, type, obj = node.get("value").replace("::","").split(", ")
 		properties = tools.getProperties(node)
 		# named by id to find easily when needed
 		node.tag = id
 		if obj == "Camera" :
-			camera_nodes.append(properties)
+			camera_nodes[id] = properties
 		elif obj == "Light" :
-			light_nodes.append(properties)
+			light_nodes[id]  = properties
 
-	camera_models, light_models, null_camera_models = [], [], []
+	camera_models, light_models, null_models = {}, {}, {}
 	for model in models :
 		id, type, obj = model.get("value").replace("::","").split(", ")
 		properties = tools.getProperties(model)
 		# named by id to find easily when needed
 		node.tag = id
-		if obj == "Camera" :
-			camera_models.append(properties)
+		if obj == "Camera"  :
+			camera_models[id] = properties
 		elif obj == "Light" :
-			light_models.append(properties)
-		elif obj == "Null" :
-			null_camera_models.append(properties)
+			light_models[id]  = properties
+		elif obj == "Null"  :
+			null_models[id]   = properties
 
 	# Handle lights
-	if len(light_nodes) != len(light_models) :
-		print("nb of light nodes and light models not the same")
-		exit(0)
 
-	for i in range(len(light_nodes)) :
-		light_node, light_model = light_nodes[i], light_models[i]
+	for id, light_model in light_models.items() :
+		if len(links_simple[id]) != 1 :
+			print("light_cam_builder_fbx : "+len(links_simple[id])+" node(s) for light model "+id)
+		light_node = light_nodes[links_simple[id][0]]
 
-		light_is_a_spot = "LightType" in light_node # LightType is present when the light is a spot
-
+		light_is_a_spot = "LookAtProperty" in links_param[id] # LightType is present when the light has a target
 
 		if "3dsMax|FSphereExtParameters|light_radius" in light_node : # This parameter means that the light is a sphere
 			light_is_a_sphere = True
@@ -79,18 +77,26 @@ def build(root, nodes, models, nulls) :
 			type   = "spot" if light_is_a_spot else "area" if light_is_a_sphere else "point"
 		)
 
-		tools.set_value(light, "spectrum", "radiance" if light_is_a_sphere else "intensity", " ".join(rvb))
-		if light_is_a_spot :
-			pass
-			# tools.transform_lookat()
+		tools.set_value(light, "spectrum", "radiance" if light_is_a_sphere and not light_is_a_spot else "intensity", " ".join(rvb))
+
+		if light_is_a_spot  :
+			# angles are divided by 2 because 3dsMax expresses the total angle, and mitsuba the angle from the center of the ray
+			tools.set_value(light, "float", "cutoffAngle", str(.5*float(light_node["OuterAngle"][-1])))
+			tools.set_value(light, "float", "beamWidth",   str(.5*float(light_node["InnerAngle"][-1])))
+			tools.transform_lookat(
+				light,
+				" ".join(light_model["Lcl Translation"][-3:]),
+				" ".join(null_models[links_param[id]["LookAtProperty"]]["Lcl Translation"][-3:])
+				)
 		else :
 			tools.transform_object(light_shape if light_is_a_sphere else light, light_model)
 
-	# Handle cameras
-	if len(camera_nodes) != len(camera_models) :
-		print("nb of camera nodes and camera models not the same")
 
-	for camera_node in camera_nodes :
+	# Handle cameras
+	for id, camera_model in camera_models.items() :
+		if len(links_simple[id]) != 1 :
+			print("light_cam_builder_fbx : "+str(len(links_simple[id]))+" node(s) for camera model "+id)
+		camera_node = camera_nodes[links_simple[id][0]]
 		curr_camera = tools.create_obj(root, "sensor", "perspective")
 
 		curr_film = tools.create_obj(curr_camera, "film", "hdrfilm")
@@ -107,29 +113,3 @@ def build(root, nodes, models, nulls) :
 
 		tools.set_value(curr_camera, "float", "fov", camera_node["FieldOfView"][-1])
 		tools.set_value(curr_camera, "string", "fovAxis", "x")# Max expresses the horizontal fov
-
-	""" Not correct. TODO do this properly
-	for i in range(len(null_camera_models)//2) :
-		camera = null_camera_models[2*i]
-		camera_target = null_camera_models[2*i+1]
-
-		curr_camera = tools.create_obj(root, "sensor", "perspective")
-
-		curr_film = tools.create_obj(curr_camera, "film", "hdrfilm")
-		rfilter = tools.create_obj(curr_film, "rfilter", "box")
-
-		# Set up with nice values. TODO parameters to control this
-		curr_sampler = tools.create_obj(curr_camera, "sampler", "ldsampler")
-		tools.set_value(curr_sampler, "integer", "sampleCount", "64")
-
-		tools.transform_lookat(
-			curr_camera,
-			" ".join(camera["Lcl Translation"][-3:]),
-			" ".join(camera_target["Lcl Translation"][-3:]),
-			config.upvector
-		)
-	"""
-
-
-
-	return
