@@ -2,6 +2,7 @@ import shutil
 import argparse
 import fbx2tree
 import builder_fromfbx
+import time
 # config is useful to keep info for the different modules
 import config
 
@@ -37,3 +38,4 @@ fbxtree = fbx2tree.transform()
 builder_fromfbx.build(fbxtree)
 
 print("Conversion finished !")
+time.sleep(1)

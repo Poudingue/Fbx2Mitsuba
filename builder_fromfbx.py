@@ -1,10 +1,10 @@
 import os
 import tools
-import light_cam_builder_fbx
-import textures_builder_fbx
-import materials_builder_fbx
-import shapes_builder_fbx
-import models_builder_fbx
+import light_cam_builder
+import textures_builder
+import materials_builder
+import shapes_builder
+import models_builder
 import xml.etree.ElementTree as etree
 import config
 
@@ -12,6 +12,7 @@ def build(fbxtree):
 	verbose = config.verbose
 	if verbose : print("builder_fromfbx launched")
 
+	# Get information about the vertical axis used
 	globalsettings = tools.getProperties(fbxtree.find("GlobalSettings"))
 	config.upvector = "0 1 0" if globalsettings["UpAxis"][-1] == "1" else "0 0 1"
 
@@ -38,9 +39,10 @@ def build(fbxtree):
 	"""
 
 	# Useful to link objects, textures to materials, materials to models, and geometry to models.
-	connections_list = fbxtree.find("Connections")
+	connections_list  = fbxtree.find("Connections")
 	comments = connections_list.findall("comment")
 	links    = connections_list.findall("C")
+
 	# Stocking links between objects.
 	# Links simple and links revert are simple links, for example for hierarchies of objects.
 	# Links param and links param revert are for parameters, for example, a texture referenced by a material.
@@ -53,11 +55,11 @@ def build(fbxtree):
 	tools.create_obj(root, "integrator", "path")
 
 	# All the functions will directly add their elements to the root element
-	light_cam_ids = light_cam_builder_fbx.build(root, nodes, models, nulls, links_simple, links_param)
-	textures_id   =  textures_builder_fbx.build(root, textures, links_param_revert)
-	materials_ids = materials_builder_fbx.build(root, materials, textures_id, links_param, links_param_revert)
-	shapes_ids    =    shapes_builder_fbx.build(root, geometries, materials_ids, links_simple, links_revert)
-	models_builder_fbx.build(root, models, links_simple, links_revert, shapes_ids)
+	light_cam_ids = light_cam_builder.build(root, nodes, models, nulls, links_simple, links_param)
+	textures_id   =  textures_builder.build(root, textures, links_param_revert)
+	materials_ids = materials_builder.build(root, materials, textures_id, links_param, links_param_revert)
+	shapes_ids    =    shapes_builder.build(root, geometries, materials_ids, links_simple, links_revert)
+	models_builder.build(root, models, links_simple, links_revert, shapes_ids)
 
 	if verbose : print("Writing to file…")
 	with open(config.filename+".xml", "w", encoding="utf8") as outputfile :

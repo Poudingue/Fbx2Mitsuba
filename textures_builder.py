@@ -20,8 +20,6 @@ def build(root, textures, links_param_revert):
 		properties = tools.getProperties(texture)
 		uoff, voff         = properties["Translation"][-3:-1] if "Translation" in properties else ["0", "0"]
 		uscaling, vscaling = properties["Scaling"]    [-3:-1] if "Scaling"     in properties else ["1", "1"]
-		# uoff, voff         = texture.find("ModelUVTranslation").text.split(",")
-		# uscaling, vscaling = texture.find("ModelUVScaling"    ).text.split(",")
 
 		if reference == "" :
 			if verbose : print("Empty reference for id "+id+", replacing with error texture")
@@ -41,11 +39,11 @@ def build(root, textures, links_param_revert):
 			tools.set_value(curr_texture, "string", "filename", reference)
 
 			# Avoid cluttering for the final file, removing 0 offsets and 1 scaling
-			if uoff != "0"     : tools.set_value(curr_texture, "float", "uoffset", uoff)
-			if voff != "0"     : tools.set_value(curr_texture, "float", "voffset", voff)
+			if uoff     != "0" : tools.set_value(curr_texture, "float", "uoffset", uoff)
+			if voff     != "0" : tools.set_value(curr_texture, "float", "voffset", voff)
 			if uscaling != "1" : tools.set_value(curr_texture, "float", "uscale",  uscaling)
 			if vscaling !="-1" : tools.set_value(curr_texture, "float", "vscale",  str(-float(vscaling)))
-			# For some reason textures in 3dsmax have their v values inverted compared to mitsuba.
+			# Textures in 3dsmax have their v values inverted compared to mitsuba.
 
 		else :
 			print("Unknown texture file type : "+reference.split(".")[-1])

@@ -33,7 +33,7 @@ def transform() :
 		elif reg_opening != None :								# New child, remember the parrent, and create the new child.
 			parents.append(current_elem)
 			current_elem = etree.SubElement(current_elem, reg_opening[1].replace(" ","").replace(":",""))
-			current_elem.set("value",reg_opening[2].strip())	# Potential complementary infos
+			if reg_opening[2].strip() != "" : current_elem.set("value",reg_opening[2].strip())	# Potential complementary infos
 
 		elif reg_info != None :									# Infos for the current child,
 			onemoreline = moretext = reg_info[2]

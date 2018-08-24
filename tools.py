@@ -48,7 +48,10 @@ def new_obj(object, type, id=missing) :
 
 
 # Open an image and make it compatible with roughness as Mitsuba suggests it :
-# No value above .5, and if this is a glossinness map, do an inversion (linear, it's what 3dsmax seems to be doing)
+# No value above .5, and if this is a glossinness map, do an inversion.
+# I'm doing a linear inversion, it's closest to the way it seems to behave in 3ds Max.
+# However, it's not perfect, there's maybe a need for a custom conversion.
+
 # Returns the reference of the texture to use
 def roughness_convert(reference, invert) :
 	if not pilimported :
@@ -109,13 +112,16 @@ def getProperties(object) :
 # It doesn't seem to match 3dsmax scale for kelvin color
 # Will maybe implement something more accurate later (full spectrum instead of rgb ??? Mitsuba has spectral rendering)
 # More info on blackbodies : https://en.wikipedia.org/wiki/Color_temperature
+
+# I created an ods file with data extracted from 3dsmax renders, containing R, G and B values for various temperatures.
+# Curves seem pretty hard to approximate correctly with standard regression methods.
 def kelvin2rgb(kelvin) :
 
 	if kelvin < 1000 or kelvin > 40000 :
 		print("Kelvin values should be between 1 000 and 40 000, the value will be clamped to match these limits")
 	kelvin = clamp(kelvin, 1000, 40000) #Clamp value
 	kelvin *= .01 # Divide by 100 to deal with smaller numbers
-	kelvin *= .8  # Correction to match real colors obtained
+	kelvin *= .8  # Approximate correction HACK for the different kelvin scale in 3dsmax.
 
 	red = 255. if kelvin <= 66 else clamp(329.698727446 * (kelvin - 60) ** -.1332047592 ,0, 255)
 
@@ -186,13 +192,13 @@ def transform_object(current_object, properties) :
 	# geomtranslat and geomrotat are to be applied before scaling
 	postrotation= [str2float2str(numb) for numb in (properties        ["PostRotation"][-3:] if         "PostRotation" in properties else [])] # Useful ?
 	geomtranslat= [str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
-	geomrotat   = [str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if "GeometricRotation"    in properties else [])]
+	geomrotat   = [str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if    "GeometricRotation" in properties else [])]
 	scaling     = [str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
-	rotation    = [str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if      "Lcl Rotation"    in properties else [])]
+	rotation    = [str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if         "Lcl Rotation" in properties else [])]
 	prerotation = [str2float2str(numb) for numb in (properties         ["PreRotation"][-3:] if          "PreRotation" in properties else [])]
 	translation = [str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
 
-	# Add infos to xml only if != 0 to make for a lighter and cleaner file
+	# Add infos to xml only if != 0 to make for a lighter and cleaner final file
 	if geomtranslat != [] :
 		curr_translat2 = etree.SubElement(current_transform, "translate")
 		for i in range(3) :
@@ -236,9 +242,6 @@ def transform_object(current_object, properties) :
 			curr_string = translation[i]
 			if float(curr_string) != 0 :
 				curr_translat.set(dict_index_to_axis[i], translation[i])
-
-
-
 
 
 # Create a xml with correct indentation

@@ -52,6 +52,7 @@ def build(root, nodes, models, nulls, links_simple, links_param) :
 			sphere_radius = float(light_node["3dsMax|FSphereExtParameters|light_radius"][-1])
 		else : light_is_a_sphere = False
 
+		# This is a mess. TODO clean all this, it's not legible
 		if "3dsMax|FAreaParameters" in light_node : #TODO area lights
 			print("Area lights not supported yet, light with id "+id+"will be considered as a point light for now")
 			colors = light_node["Color"][-3:] if "Color" in light_node else ["1","1","1"]
