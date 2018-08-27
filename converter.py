@@ -38,4 +38,3 @@ fbxtree = fbx2tree.transform()
 builder_fromfbx.build(fbxtree)
 
 print("Conversion finished !")
-time.sleep(1)

@@ -7,7 +7,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 - export the 3ds Max scene in the fbx format (ascii fbx, not binary !)
 - install python 3.7 if you don't have it already
 - install Pillow for Python (used for roughness map conversion)
-- use converter.py with your fbx file as a parameter (you can drag and drop the fbx on converter.py)
+- use “launcher.bat” by drag-and-dropping your fbx file on it.
 - available commands :
 	- --verbose (or -v) displays more info about conversion
 	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a very long time for big files⚠️

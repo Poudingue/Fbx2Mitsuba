@@ -79,6 +79,8 @@ Puis vont être appelées dans l'ordre les fonctions de création de caméras et
 
 Pour finir, le fichier final XML est créé.
 
+# TODO section
+
 ## light_cam_builder
 
 ## texture_builder

@@ -4,6 +4,14 @@ import tools
 import config
 import xml.etree.ElementTree as etree
 
+# nameofvalue and nameoftexture are respectively the expected name for the value/color and for the texture.
+# nameofscale is to use in case there is a scaling for the value of the texture, for exemple with bumpmap.
+# colororvalue is to specify if this is a color or a value that's used as fallback for the texture.
+# active is the name of the parameter to check to see if texture is active
+
+def value_or_texture(target, properties, linked, nameofvalue, nameoftexture, nameofscale, colororvalue, active=True) :
+	pass
+
 def build(root, materials, textures_id, links_param, links_param_revert):
 	if config.verbose : print("materials_builder_fbx launched")
 	comment = etree.Comment("Materials with ids")
@@ -26,11 +34,9 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			scale = properties["3dsMax|Parameters|bump_map_amt"][-1]
 			curr_bumpmod = tools.create_obj(root, "bsdf", "bumpmap", id)
 			if scale != "1" :
-				curr_bumpmap = tools.create_obj(curr_bumpmod, "texture", "scale")
-				tools.set_value(curr_bumpmap, "float", "scale", scale)
-				tools.set_ref(curr_bumpmap, linked["3dsMax|Parameters|bump_map"])
-			else :
-				tools.set_ref(curr_bumpmod, linked["3dsMax|Parameters|bump_map"])
+				curr_bumpmod = tools.create_obj(curr_bumpmod, "texture", "scale")
+				tools.set_value(curr_bumpmod, "float", "scale", scale)
+			tools.set_ref(curr_bumpmod, linked["3dsMax|Parameters|bump_map"])
 
 			curr_material = etree.SubElement(curr_bumpmod, "bsdf")
 		else :
