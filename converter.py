@@ -1,3 +1,13 @@
+import sys
+
+if sys.version_info[0] != 3 :
+	print("Running in python "+sys.version_info[0]+", should be python 3.")
+	print("Please install python 3.7 from the official site python.org")
+	print("Exiting now.")
+	exit()
+
+
+
 import shutil
 import argparse
 import fbx2tree

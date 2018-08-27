@@ -20,5 +20,7 @@ echo --closest or --realist : Mutually exclusive options to prioritize fidelity 
 echo --portable : Uses relative
 goto args
 : execution
+echo Pillow installation...
+pip install Pillow
 python converter.py %1 %arguments%
 pause
