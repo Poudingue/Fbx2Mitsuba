@@ -4,13 +4,18 @@ import tools
 import config
 import xml.etree.ElementTree as etree
 
-# nameofvalue and nameoftexture are respectively the expected name for the value/color and for the texture.
-# nameofscale is to use in case there is a scaling for the value of the texture, for exemple with bumpmap.
-# colororvalue is to specify if this is a color or a value that's used as fallback for the texture.
-# active is the name of the parameter to check to see if texture is active
+# Try to set a texture for the target. Returns True in case of success, or False in case of failure.
+def set_texture(target, linked, nameoftexture, scale = "1") :# If unspecified, the scale is 1
+	if nameoftexture in linked :
+		if scale != "1" :
+			target = tools.create_obj(target, "texture", "scale")
+			tools.set_value(target, "float", "scale", scale)
+		else :
+			target = tools.new_obj("texture", "bitmap")
+		tools.set_ref(target, linked[nameoftexture])
+		return target
+	return False
 
-def value_or_texture(target, properties, linked, nameofvalue, nameoftexture, nameofscale, colororvalue, active=True) :
-	pass
 
 def build(root, materials, textures_id, links_param, links_param_revert):
 	if config.verbose : print("materials_builder_fbx launched")
@@ -27,26 +32,20 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 		linked = links_param[id] if id in links_param else []
 		properties = tools.getProperties(material)
 
+		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
+		else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse, for debug
+		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1 1 1"
+		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
+
 		# If bumpmap is on, use it
-		if ("3dsMax|Parameters|bump_map_on" in properties # Bump map
-			and properties["3dsMax|Parameters|bump_map_on"][-1] == "1"
-			and "3dsMax|Parameters|bump_map" in linked) :# Use bump map
+		if ("3dsMax|Parameters|bump_map" in linked) :# Use bump map
 			scale = properties["3dsMax|Parameters|bump_map_amt"][-1]
 			curr_bumpmod = tools.create_obj(root, "bsdf", "bumpmap", id)
-			if scale != "1" :
-				curr_bumpmod = tools.create_obj(curr_bumpmod, "texture", "scale")
-				tools.set_value(curr_bumpmod, "float", "scale", scale)
-			tools.set_ref(curr_bumpmod, linked["3dsMax|Parameters|bump_map"])
-
+			set_texture(curr_bumpmod, linked, "3dsMax|Parameters|bump_map", scale)
 			curr_material = etree.SubElement(curr_bumpmod, "bsdf")
 		else :
 			curr_material = etree.SubElement(root, "bsdf")
 			curr_material.set("id", id)
-
-		diffuse_color  =(" ".join(properties["Diffuse"][-3:])         if "Diffuse"           in properties
-					else(" ".join(properties["DiffuseColor"][-3:])    if "DiffuseColor"      in properties else "1 0 0")) #Use red if there is no diffuse, for debug
-		specular_color = " ".join(properties["Specular"][-3:])        if "Specular"          in properties else "1 1 1"
-		shininess      =          properties["ShininessExponent"][-1] if "ShininessExponent" in properties else ""
 
 		# Roughness
 		if "3dsMax|Parameters|roughness" in properties :
@@ -72,7 +71,7 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 			curr_roughness = None
 			# Based on this blog post : https://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
 			# √(2/(α+2))
-			# But divided by 2, because mitsuba doesn't support higher roughness
+			# But divided by 2, because of mitsuba's roughness scale
 			roughness = .5 * (2./(float(shininess)+2.)) ** (.5)
 			curr_roughness = etree.Element("float")
 			curr_roughness.set("name", "alpha")

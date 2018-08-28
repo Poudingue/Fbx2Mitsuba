@@ -158,8 +158,8 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 
 					# Generate multiple triangle to replace polygons (not supported by Mitsuba Renderer)
 					if len(curr_poly_index) > 3 :
-						for k in range(len(curr_poly_index)-2) :
-							curr_poly = [curr_poly_index[0]]+curr_poly_index[k+1:k+3]
+						for k in range(len(curr_poly_index) - 2) :
+							curr_poly = [curr_poly_index[0]] + curr_poly_index[k+1:k+3]
 							poly_index.append(curr_poly)
 					elif len(curr_poly_index) > 0 :
 						poly_index.append(curr_poly_index)

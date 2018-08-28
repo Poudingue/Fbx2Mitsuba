@@ -190,13 +190,13 @@ def transform_object(current_object, properties) :
 	if current_transform == None : current_transform = create_obj(current_object, "transform", "toWorld")
 
 	# geomtranslat and geomrotat are to be applied before scaling
-	postrotation= [str2float2str(numb) for numb in (properties        ["PostRotation"][-3:] if         "PostRotation" in properties else [])] # Useful ?
-	geomtranslat= [str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
-	geomrotat   = [str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if    "GeometricRotation" in properties else [])]
-	scaling     = [str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
-	rotation    = [str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if         "Lcl Rotation" in properties else [])]
-	prerotation = [str2float2str(numb) for numb in (properties         ["PreRotation"][-3:] if          "PreRotation" in properties else [])]
-	translation = [str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
+	postrotation = [str2float2str(numb) for numb in (properties        ["PostRotation"][-3:] if         "PostRotation" in properties else [])] # Useful ?
+	geomtranslat = [str2float2str(numb) for numb in (properties["GeometricTranslation"][-3:] if "GeometricTranslation" in properties else [])]
+	geomrotat    = [str2float2str(numb) for numb in (properties   ["GeometricRotation"][-3:] if    "GeometricRotation" in properties else [])]
+	scaling      = [str2float2str(numb) for numb in (properties         ["Lcl Scaling"][-3:] if          "Lcl Scaling" in properties else [])]
+	rotation     = [str2float2str(numb) for numb in (properties        ["Lcl Rotation"][-3:] if         "Lcl Rotation" in properties else [])]
+	prerotation  = [str2float2str(numb) for numb in (properties         ["PreRotation"][-3:] if          "PreRotation" in properties else [])]
+	translation  = [str2float2str(numb) for numb in (properties     ["Lcl Translation"][-3:] if      "Lcl Translation" in properties else [])]
 
 	# Add infos to xml only if != 0 to make for a lighter and cleaner final file
 	if geomtranslat != [] :
@@ -251,7 +251,7 @@ def prettifyXml(uglyxml) :
 	# This is a faster solution if it takes too long, but it's ugly with no indentation,
 	# so use only for debug purposes or if the xml creation takes too long :
 	""" return uglyxml.replace(">", ">\n") """
-
+	
 	multiline = uglyxml.replace(">", ">\n").replace("<","\n<").split("\n")
 	out = ""
 	curr_indent = 0
