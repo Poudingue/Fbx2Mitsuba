@@ -23,7 +23,6 @@ parser.add_argument("-d", "--debug",   help="Create intermediate xml files for d
 parser.add_argument("--closest",       help="Try to stick as close to the original materials in 3dsmax, even if it is at the expense of realism", action="store_true")
 parser.add_argument("--realist",       help="Try to make materials as realist as possible, even if it is at the expense of fidelity to the original scene", action="store_true")
 parser.add_argument("--portable",      help="Use relative path to look for textures. Better if you intend to use the scene on an other computer, with textures in a folder", action="store_true")
-# TODO replace this version of portable with a version creating a subfolder with all the necessary assets in it
 
 args = parser.parse_args()
 

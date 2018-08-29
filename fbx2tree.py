@@ -4,6 +4,9 @@ import config
 import xml.etree.ElementTree as etree
 
 def transform() :
+	"""
+	This function generates an element tree from the FBX file
+	"""
 	filename, verbose, debug = config.filename, config.verbose, config.debug
 
 	if verbose : print("fbx2tree launched…")

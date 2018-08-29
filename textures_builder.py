@@ -5,6 +5,10 @@ from pathlib import Path
 import xml.etree.ElementTree as etree
 
 def build(root, textures, links_param_revert):
+	"""
+	Creates textures with in the scene.
+	Return a list of texture ids.
+	"""
 	verbose = config.verbose
 
 	if verbose : print("textures_builder_fbx launched")

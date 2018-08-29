@@ -4,8 +4,10 @@ import tools
 import config
 import xml.etree.ElementTree as etree
 
-# Try to set a texture for the target. Returns True in case of success, or False in case of failure.
 def set_texture(target, linked, nameoftexture, scale = "1") :# If unspecified, the scale is 1
+	"""
+	Try to set a texture for the target. Returns True in case of success, or False in case of failure.
+	"""
 	if nameoftexture in linked :
 		if scale != "1" :
 			target = tools.create_obj(target, "texture", "scale")
@@ -18,6 +20,10 @@ def set_texture(target, linked, nameoftexture, scale = "1") :# If unspecified, t
 
 
 def build(root, materials, textures_id, links_param, links_param_revert):
+	"""
+	Creates materials with ids in the scene.
+	Returns a list of materials id.
+	"""
 	if config.verbose : print("materials_builder_fbx launched")
 	comment = etree.Comment("Materials with ids")
 	root.append(comment)

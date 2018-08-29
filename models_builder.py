@@ -4,8 +4,10 @@ import tools
 import config
 import xml.etree.ElementTree as etree
 
-# Useful to retrieve the transform from all the hierarchy of the scene.
 def recursive_build_hierarchy(root, shapes_ids, object, links_simple, links_revert, models_id, id) :
+	"""
+	Retrieves and apply all the transformations necessary from the hierarchy all the way to the root.
+	"""
 	if id in links_revert :
 		for parent_id in links_revert[id] : # If multiple parents, multiple instances of the object must be created.
 			current_object = deepcopy(object)
@@ -17,6 +19,9 @@ def recursive_build_hierarchy(root, shapes_ids, object, links_simple, links_reve
 
 
 def build(root, models, links_simple, links_revert, shapes_ids):
+	"""
+	Put shapes in the scene and apply the correct transforms.
+	"""
 	if config.verbose : print("models_builder_fbx launched")
 
 	comment = etree.Comment("Models.")
@@ -38,7 +43,6 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 					curr_ref = etree.SubElement(curr_shape, "ref")
 					curr_ref.set("id", link)
 					recursive_build_hierarchy(root, shapes_ids, curr_shape, links_simple, links_revert, models_id, id)
-
 
 		elif config.verbose :
 			print("id "+id+" not in links_simple")
