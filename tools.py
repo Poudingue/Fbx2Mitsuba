@@ -66,6 +66,7 @@ def roughness_convert(reference, invert) :
 	if not pilimported :
 		print("Pillow doesn't seem to be installed, roughness maps may cause some problems.")
 		return reference
+	if config.portable : reference = "export/"+reference
 	input = Image.open(reference)# Convert to luminance
 	filename = reference.replace("\\","/").split("/")[-1]
 
@@ -78,10 +79,11 @@ def roughness_convert(reference, invert) :
 	else :
 		output = input.point(lambda px : int(.5 * 255. * (float(px)/255.)))
 
-	if not os.path.exists("converted_textures") :
-		os.makedirs("converted_textures")
-	output.save("converted_textures/"+filename)
-	return "converted_textures/"+filename
+	savedir = "export/textures"
+	if not os.path.exists(savedir) :
+		os.makedirs(savedir)
+	output.save(savedir+"/"+filename)
+	return savedir+"/"+filename
 
 
 def clamp(value, minv, maxv) :
