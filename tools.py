@@ -117,21 +117,24 @@ def getProperties(object) :
 # Curves seem pretty hard to approximate correctly with standard regression methods.
 def kelvin2rgb(kelvin) :
 
-	if kelvin < 1000 or kelvin > 40000 :
-		print("Kelvin values should be between 1 000 and 40 000, the value will be clamped to match these limits")
-	kelvin = clamp(kelvin, 1000, 40000) #Clamp value
-	kelvin *= .01 # Divide by 100 to deal with smaller numbers
-	kelvin *= .8  # Approximate correction HACK for the different kelvin scale in 3dsmax.
+	if kelvin < 1000 or kelvin > 20000 :
+		print("Kelvin values should be between 1 000 and 20 000, the value will be clamped to match these limits")
+	kelvin = clamp(kelvin, 1000, 20000) #Clamp value
+	kelvin /= 1000 # Divide by 1000 to deal with smaller numbers
 
-	red = 255. if kelvin <= 66 else clamp(329.698727446 * (kelvin - 60) ** -.1332047592 ,0, 255)
+	r_start_transient, r_end_transient = 2, 5
+	r_lower, r_higher = -44.1688669323003 * math.log(kelvin) + 87.2872299941858, -5.05773731937356 * math.log(kelvin) + 33.0778432820841
+	r_mix = clamp((kelvin - r_start_transient)/(r_end_transient - r_start_transient), 0, 1)
+	red = (1-r_mix)*r_lower + r_mix*r_higher
 
-	green = clamp(99.4708025861 * math.log(kelvin) - 161.1195681661 if kelvin <= 66
-		else 288.1221695283 * (kelvin - 60) ** -0.0755148492
-		, 0, 255)
+	g_unlimited = 18.9671759008472 * math.log(kelvin) + 2.28121373699985
+	g_mix = min(g_unlimited/25.3, 1)
+	green = g_mix * 25.3 + (1-g_mix) * g_unlimited
 
-	blue =  0 if kelvin <= 19 else clamp(138.5177312231 * math.log(kelvin - 10) - 305.0447927307, 0, 255)
+	blue = max(0, 19.178918414813 * math.log(kelvin) - 12.4836627601213)
 
-	return red/255, green/255, blue/255 # Convert to a 0-1 range
+	average = red + green + blue / 3
+	return red/average, green/average, blue/average
 
 #
 def extract_links(links) :
@@ -251,7 +254,7 @@ def prettifyXml(uglyxml) :
 	# This is a faster solution if it takes too long, but it's ugly with no indentation,
 	# so use only for debug purposes or if the xml creation takes too long :
 	""" return uglyxml.replace(">", ">\n") """
-	
+
 	multiline = uglyxml.replace(">", ">\n").replace("<","\n<").split("\n")
 	out = ""
 	curr_indent = 0
