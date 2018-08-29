@@ -7,13 +7,13 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 - export the 3ds Max scene in the fbx format (ascii fbx, not binary !)
 - install python 3.7 if you don't have it already
 - install Pillow for Python (used for roughness map conversion)
-- use “launcher.bat” by drag-and-dropping your fbx file on it.
+- use “launcher.bat” or “converter.py” by drag-and-dropping your fbx file on it.
 - available commands :
 	- --verbose (or -v) displays more info about conversion
 	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a very long time for big files⚠️
  	- --realist and --closest allow to choose between the most realistic rendering or the more faithful to the original 3dsmax. If you don't know don't put any, it will achieve a “balanced” look
-	- --portable uses relative file path for textures, useful if you intend to transfer your scene to another computer
-- the mitsuba output file is “scene.xml”
+	- --portable is for creating a subfolder containing all the necessary ressources for the scene. Still WIP.
+- the mitsuba output file is an xml with the same name as your fbx.
 
 ## What will be converted
 
@@ -58,7 +58,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 
 ## How it works
 
-- FBX file is parsed (and written to xml file if debug is active)
+- FBX file is parsed as a tree (and written to xml file if debug is active)
 - lights and cameras are added to the scene
 - every texture is referenced with a unique id
 - every material is referenced with a unique id, and can use textures id
@@ -66,8 +66,8 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 	- if an object has multiple materials applied to it, it will create a separate mesh for each one
 	- materials are called by their ids
 - every object placed on the scene create a shape, referencing shapegroups, correctly placed, scaled and rotated.
-- meshes are stored in their respective folder
-- everything is written in the “scene.xml” file, except for meshes, staying in their respective folder
+- meshes are stored in a folder as .ply files.
+- everything is written in the “scene.xml” file.
 
 ## Roadmap
 
@@ -77,7 +77,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 - Make a more complete “portable” option, putting everything in a single folder
 - Simplify user experience
 - Documentation for users and developpers
-- Increase the number of supported materials
+- Increase the variety of supported materials
 - More parameters
 - Catch more potential problem with fbx file infos
 
