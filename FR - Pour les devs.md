@@ -111,8 +111,10 @@ La partie materials_builder est très linéaire dans son exécution, avec beauco
 
 ## Conversions plus précises
 
-Le programme utilise actuellement des algorithmes arbitraires et approximatifs pour la conversion de la carte de glossiness et de la couleur exprimée en Kelvin. Il faudrait raffiner ces algorithmes pour plus de fidélité à la scène originale.
+Le programme utilise actuellement un algorithme arbitraires et approximatif pour la conversion de la carte de glossiness. Il faudrait raffiner cet algorithme pour plus de fidélité à la scène originale.
 
 ## Exportation portable
+
+WIP
 
 L'exportation prend pour l'instant les références qui sont données par le fichier FBX. Avec l'option --portable, les chemins relatifs sont pris. L'idéal serait la création d'un nouveau dossier comprenant la scène Mitsuba Renderer ainsi que tout ce qui est nécessaire à l'affichage correct. L'ensemble des maillages, l'ensemble des textures, dans des sous-dossiers. Dans ce genre de cas, le transfert de fichiers d'un ordinateur à l'autre ne poserait plus aucun problème. Le programme devrait aussi, lorsqu'il n'arrive pas à trouver un fichier là où il devrait être, permettre à l'utilisateur de spécifier le chemin.
