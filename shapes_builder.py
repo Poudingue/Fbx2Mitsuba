@@ -5,6 +5,10 @@ import xml.etree.ElementTree as etree
 
 
 def build(root, geometries, materials_ids, links_simple, links_revert):
+	"""
+	Exports all the geometry into a folder for later use in the scene.
+	Return a list of ids for the geometry
+	"""
 	if config.verbose : print("shapes_builder_fbx launched")
 	if not os.path.exists("meshes") :
 		os.makedirs("meshes")

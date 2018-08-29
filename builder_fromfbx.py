@@ -9,6 +9,9 @@ import xml.etree.ElementTree as etree
 import config
 
 def build(fbxtree):
+	"""
+	This function builds the scene from the fbx tree.
+	"""
 	verbose = config.verbose
 	if verbose : print("builder_fromfbx launched")
 
@@ -22,8 +25,8 @@ def build(fbxtree):
 	models    = objects.findall("Model")
 	geometries= objects.findall("Geometry")
 	materials = objects.findall("Material")
-	nodes     = objects.findall("NodeAttribute") # Include cameras and lights
-	videos    = objects.findall("Video") # Not sure about what it contains, it seems to be a duplicate of “textures”. Maybe for compatibility reasons ?
+	nodes     = objects.findall("NodeAttribute") # Contains some cameras and lights properties
+	# videos    = objects.findall("Video") # Not sure about what it contains, it seems to be a duplicate of “textures”. Maybe for compatibility reasons ?
 	textures  = objects.findall("Texture")
 	nulls     = objects.findall("Null") # Useful for cameras and spot targets
 
@@ -55,7 +58,7 @@ def build(fbxtree):
 	tools.create_obj(root, "integrator", "path")
 
 	# All the functions will directly add their elements to the root element
-	light_cam_ids = light_cam_builder.build(root, nodes, models, nulls, links_simple, links_param)
+	light_cam_builder.build(root, nodes, models, nulls, links_simple, links_param)
 	textures_id   =  textures_builder.build(root, textures, links_param_revert)
 	materials_ids = materials_builder.build(root, materials, textures_id, links_param, links_param_revert)
 	shapes_ids    =    shapes_builder.build(root, geometries, materials_ids, links_simple, links_revert)

@@ -4,6 +4,9 @@ import config
 import xml.etree.ElementTree as etree
 
 def build(root, nodes, models, nulls, links_simple, links_param) :
+	"""
+	Creates lights and cameras in the scene
+	"""
 	verbose = config.verbose
 	debug   = config.debug
 	if verbose : print("lightsandcameras_builder_fbx launched")
