@@ -103,16 +103,12 @@ Une fois lancée, cette interface vérifierait la version de Python, installerai
 
 Pour l'instant, tous les types d'objets ne sont pas pris en compte. Les caméras physiques, les informations de transluminescence, ainsi que beaucoup d'autres détails, ne sont pas encore implémentés. Le fichier FBX contenant des informations limitées, il faudra dans un premier temps récupérer tout ce qui est possible de récupérer. L'utilisation d'un autre format (ASE par exemple) pour compléter les information peut également être envisagé. L'exemple de l'environnement mapping, présent dans le ASE mais pas dans le FBX, est un bon exemple des limitations du format.
 
-## Programme plus générique
+## Programme plus générique, code plus court.
 
-À l'heure actuelle, les modèles de type caméra et lumières sont placés par light_cam_builder. Il serait logique que models_builder s'occupe de les placer, tout comme il s'occupe de placer les modèles référençant de la géométrie. 
+À l'heure actuelle, les modèles de type caméra et lumières sont placés par light_cam_builder. Il serait logique que models_builder s'occupe de les placer, tout comme il s'occupe de placer les modèles référençant de la géométrie.
 
-La partie materials_builder est très linéaire dans son exécution, avec beaucoup de code se ressemblant, il est sans doute possible de rendre générique le fait d'appliquer soit une texture soit une couleur/valeur pour une caractéristique donnée.
+La partie materials_builder est très linéaire dans son exécution, avec beaucoup de code se ressemblant, il est sans doute possible de la rendre plus générique.
 
 ## Conversions plus précises
 
 Le programme utilise actuellement des algorithmes arbitraires et approximatifs pour la conversion de la carte de glossiness et de la couleur exprimée en Kelvin. Il faudrait raffiner ces algorithmes pour plus de fidélité à la scène originale.
-
-## Exportation portable
-
-L'exportation prend pour l'instant les références qui sont données par le fichier FBX. Avec l'option --portable, les chemins relatifs sont pris. L'idéal serait la création d'un nouveau dossier comprenant la scène Mitsuba Renderer ainsi que tout ce qui est nécessaire à l'affichage correct. L'ensemble des maillages, l'ensemble des textures, dans des sous-dossiers. Dans ce genre de cas, le transfert de fichiers d'un ordinateur à l'autre ne poserait plus aucun problème. Le programme devrait aussi, lorsqu'il n'arrive pas à trouver un fichier là où il devrait être, permettre à l'utilisateur de spécifier le chemin.

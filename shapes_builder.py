@@ -10,14 +10,14 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 	Return a list of ids for the geometry
 	"""
 	if config.verbose : print("shapes_builder_fbx launched")
-	if not os.path.exists("meshes") :
-		os.makedirs("meshes")
+	savepath = config.filepath+"export\\meshes\\"
+	if not os.path.exists(savepath) :
+		os.makedirs(savepath)
 
 	comment = etree.Comment("Shapes.")
 	root.append(comment)
 
 	geometries_id = []
-
 	# Only keep geometries with polygonvertex
 	geometries = [geometry for geometry in geometries if geometry.find("PolygonVertexIndex") != None ]
 
@@ -169,7 +169,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 						poly_index.append(curr_poly_index)
 
 				if vertex_text != [] : # Export only non-empty objects
-					output = open("meshes/"+id+"_"+str(i)+".ply", "w")
+					output = open(savepath+id+"_"+str(i)+".ply", "w")
 					output.write("ply\n")
 					output.write("format ascii 1.0\n")
 					output.write("element vertex " + str(len(vertex_text))+"\n")

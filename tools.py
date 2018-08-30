@@ -66,9 +66,11 @@ def roughness_convert(reference, invert) :
 	if not pilimported :
 		print("Pillow doesn't seem to be installed, roughness maps may cause some problems.")
 		return reference
-	if config.portable : reference = "export/"+reference
+	reference = config.filepath+"export\\"+reference
 	input = Image.open(reference)# Convert to luminance
-	filename = reference.replace("\\","/").split("/")[-1]
+	# ri means roughnes inverted, r just roughness.
+	# Different names in case the same texture is used for roughness, revert roughness, and something else.
+	filename = ".".join(reference.split("\\")[-1].split(".")[:-1])+("_ri."if invert else "_r.")+reference.split(".")[-1]
 
 	# Dither it ? There is a loss of precision with halving and reconverting to 8bit channels
 	# With simple random function, it does'nt work, the lambda seem to work by blocks in the image.
@@ -79,11 +81,11 @@ def roughness_convert(reference, invert) :
 	else :
 		output = input.point(lambda px : int(.5 * 255. * (float(px)/255.)))
 
-	savedir = "export/textures"
+	savedir = config.filepath+"export\\textures"
 	if not os.path.exists(savedir) :
 		os.makedirs(savedir)
-	output.save(savedir+"/"+filename)
-	return savedir+"/"+filename
+	output.save(savedir+"\\"+filename)
+	return "textures\\"+filename
 
 
 def clamp(value, minv, maxv) :

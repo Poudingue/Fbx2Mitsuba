@@ -18,15 +18,16 @@ def build(root, textures, links_param_revert):
 
 	textures_id = {}
 
-	if textures != [] and config.portable and not os.path.exists("export/textures") :
-		os.makedirs("export/textures")
+	if textures != [] and not os.path.exists(config.filepath+"export\\textures") :
+		os.makedirs(config.filepath+"export\\textures")
 
 	# Go through all textures in the scene
 	for texture in textures :
 		id, type, obj      = texture.get("value").replace("::","").split(",")
 		rel_reference      = texture.find("RelativeFilename").text
 		abs_reference      = texture.find("FileName").text
-		properties = tools.getProperties(texture)
+
+		properties         = tools.getProperties(texture)
 		uoff, voff         = properties["Translation"][-3:-1] if "Translation" in properties else ["0", "0"]
 		uscaling, vscaling = properties["Scaling"]    [-3:-1] if "Scaling"     in properties else ["1", "1"]
 
@@ -39,30 +40,20 @@ def build(root, textures, links_param_revert):
 		elif rel_reference.lower().endswith("dds") :
 			if verbose : print("dds format not supported")#(yet ?)
 		elif any(rel_reference.lower().endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
-
-			if not Path(rel_reference).is_file() :
+			# Supported image type. May need to add some.
+			if not Path(config.filepath+rel_reference).is_file() :
 				if not Path(abs_reference).is_file() :
 					if verbose : print("Missing texture : "+rel_reference)
-					if config.portable :
-						copyfile("missing_texture.png", "export/textures/missing_texture.png")
-						reference = "textures/missing_texture.png"
-					else :
-						reference = "missing_texture.png"
-
+					copyfile("missing_texture.png", config.filepath+"export\\textures\\missing_texture.png")
+					reference = "textures\\missing_texture.png"
 				else :
-					if config.portable :
-						new_reference = "textures/"+id+"."+rel_reference.split(".")[-1]
-						copyfile(rel_reference, "export/"+new_reference)
-						reference = new_reference
-					else :
-						reference = rel_reference
-			else :
-				if config.portable :
-					new_reference = "textures/"+id+"."+abs_reference.split(".")[-1]
-					copyfile(abs_reference, "export/"+new_reference)
+					new_reference = "textures\\"+id+"."+abs_reference.split(".")[-1]
+					copyfile(abs_reference, config.filepath+"export\\"+new_reference)
 					reference = new_reference
-				else :
-					reference = abs_reference
+			else :
+				new_reference = "textures\\"+id+"."+abs_reference.split(".")[-1]
+				copyfile(config.filepath+rel_reference, config.filepath+"export\\"+new_reference)
+				reference = new_reference
 
 			textures_id[id] = reference
 			curr_texture = tools.create_obj(root, "texture", "bitmap", id)

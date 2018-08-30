@@ -57,8 +57,8 @@ def build(fbxtree):
 	# Set up the integrator. I chose pathtracing by default TODO add as a parameter
 	tools.create_obj(root, "integrator", "path")
 
-	if config.portable and not os.path.exists("export") :
-		os.makedirs("export")
+	if not os.path.exists(config.filepath+"export") :
+		os.makedirs(config.filepath+"export")
 
 	# All the functions will directly add their elements to the root element
 	light_cam_builder.build(root, nodes, models, nulls, links_simple, links_param)
@@ -68,7 +68,7 @@ def build(fbxtree):
 	models_builder.build(root, models, links_simple, links_revert, shapes_ids)
 
 	if verbose : print("Writing to file…")
-	with open("export/"+config.filename.split("\\")[-1]+".xml" if config.portable else config.filename+".xml", "w", encoding="utf8") as outputfile :
+	with open(config.filepath+"export\\"+config.filename+".xml", "w", encoding="utf8") as outputfile :
 		if verbose : print("prettifying… (Can take a while for big files)")
 		stringout = tools.prettifyXml(etree.tostring(root).decode())
 		if verbose : print("writing…")

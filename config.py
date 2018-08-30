@@ -3,9 +3,9 @@
 
 upvector = "0 1 0"
 filename = ""
+filepath = ""
 verbose  = False
 debug    = False
 closest  = False
 realist  = False
-portable = False
 distrib  = "ggx"# It seems to be what matches best 3dsmax roughness

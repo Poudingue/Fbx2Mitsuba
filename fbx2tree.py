@@ -7,14 +7,14 @@ def transform() :
 	"""
 	This function generates an element tree from the FBX file
 	"""
-	filename, verbose, debug = config.filename, config.verbose, config.debug
+	filepath, filename, verbose, debug = config.filepath, config.filename, config.verbose, config.debug
 
 	if verbose : print("fbx2tree launched…")
 	root = etree.Element("root")
 	parents = [] # Store a list of current parents
 
 	current_elem = root
-	inputfile = open(filename+".fbx", encoding="utf8")
+	inputfile = open(filepath+filename+".fbx", encoding="utf8")
 	if verbose : print("file openened")
 
 	for line in inputfile :
@@ -65,7 +65,7 @@ def transform() :
 
 	if debug :													# Export the tree to xml for debug purposes.
 		if verbose : print("writing file")
-		with open(filename+"_fbx.xml", "w", encoding="utf8") as outputfile :
+		with open(filepath+"export\\"+filename+"_fbx.xml", "w", encoding="utf8") as outputfile :
 			if verbose : print("prettifying… (Can take a while for big files)")
 			stringout = etree.tostring(root).decode()
 			pretty = tools.prettifyXml(stringout)

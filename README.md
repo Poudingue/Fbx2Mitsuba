@@ -12,7 +12,6 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 	- --verbose (or -v) displays more info about conversion
 	- --debug (or -d) exports all fbx infos to an xml file (scene_fbx.xml) ⚠️Can take a very long time for big files⚠️
  	- --realist and --closest allow to choose between the most realistic rendering or the more faithful to the original 3dsmax. If you don't know don't put any, it will achieve a “balanced” look
-	- --portable uses relative file path for textures, useful if you intend to transfer your scene to another computer
 - the mitsuba output file is “scene.xml”
 
 ## What will be converted
