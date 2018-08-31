@@ -105,7 +105,7 @@ Le type de matériaux que j'ai priorisé et sur lequel j'ai tout axé est le typ
 
 L'environnement map n'est pas exporté dans le FBX.
 
-Les objets émissifs ne sont pas non plus pris en compte. Dans le cas d'objets texturés pour leur émissivité, Mitsuba ne semble pas proposer de solution, mais par contre supporte le fait qu'un objet dans son ensemble puisse émettre de la lumière. Il doit être assez simple d'extraire les informations correspondantes dans le FBX pour les objets émissifs.
+Les objets émissifs ne sont pas non plus pris en compte. Dans le cas d'objets texturés pour leur émissivité, Mitsuba ne semble pas proposer de solution, mais par contre supporte le fait qu'un objet dans son ensemble puisse émettre de la lumière. La principale difficulté pour l'implémenter vient du fait que du côté de 3ds Max, c'est une propriété d'un matériau, et que pour Mitsuba Renderer, c'est une propriété d'une géométrie.
 
 L'éclairage ambiant est dans les propriétés générales de la scène, ça devrait être assez rapide à implémenter.
 

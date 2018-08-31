@@ -6,7 +6,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 
 - export the 3ds Max scene in the fbx format (ascii fbx, not binary !)
 - install python 3.7 if you don't have it already
-- install Pillow for Python (used for roughness map conversion)
+- install Pillow for Python. Should be automatic with the launcher.bat
 - use “launcher.bat” or “converter.py” by drag-and-dropping your fbx file on it.
 - available commands :
 	- --verbose (or -v) displays more info about conversion
@@ -29,21 +29,20 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 
 ## What won't be converted
 
-### Should be fixed soon
+### Should be fixed one day or another
 
 - Physical cameras
 - Other photometric lights
 - Background color/light
 - Materials :
-	- Anisotropy
 	- Subsurface scattering
 	- Multilayer materials
-- Some bumpmap seem to be referencing other textures. Investigate.
 
 ### Harder to fix, will try anyway
 
 - Other light types
 - Other cameras
+- Anisotropic materials
 
 ### Probably unfixable
 
