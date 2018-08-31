@@ -14,35 +14,36 @@ def build(root, nodes, models, nulls, links_simple, links_param) :
 	comment = etree.Comment("Lights and cameras")
 	root.append(comment)
 
-	# Cameras and spotlight are very similar.
-
-	# Prepare nodes and models properties for easy access
+	# Prepare nodes properties referenced by id for easy access
 	camera_nodes, light_nodes = {}, {}
 	for node in nodes :
 		id, type, obj = node.get("value").replace("::","").split(", ")
 		properties = tools.getProperties(node)
 		# named by id to find easily when needed
 		node.tag = id
-		if obj == "Camera" :
+		if   obj == "Camera" :
 			camera_nodes[id] = properties
-		elif obj == "Light" :
+		elif obj == "Light"  :
 			light_nodes[id]  = properties
 
+	# Prepare models properties referenced by id for easy access
 	camera_models, light_models, null_models = {}, {}, {}
 	for model in models :
 		id, type, obj = model.get("value").replace("::","").split(", ")
 		properties = tools.getProperties(model)
 		# named by id to find easily when needed
 		node.tag = id
-		if obj == "Camera"  :
+		if   obj == "Camera" :
 			camera_models[id] = properties
-		elif obj == "Light" :
+		elif obj == "Light"  :
 			light_models[id]  = properties
-		elif obj == "Null"  :
+		elif obj == "Null"   :
 			null_models[id]   = properties
 
-	# Handle lights
-
+	# Lights
+	# Every light placed in the scene is referenced by a model.
+	# This model should be linked to a node containing all the light's properties.
+	# Once we retrieved it, we are able to create the light correctly
 	for id, light_model in light_models.items() :
 		if len(links_simple[id]) != 1 :
 			print("light_cam_builder_fbx : "+len(links_simple[id])+" node(s) for light model "+id)

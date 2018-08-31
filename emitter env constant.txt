@@ -1,3 +1,0 @@
-<emitter type="constant">
-		<spectrum name="radiance" value="1 1 1"/>
-	</emitter>

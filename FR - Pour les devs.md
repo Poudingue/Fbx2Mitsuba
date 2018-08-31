@@ -1,7 +1,7 @@
 # Format FBX
 
 Le format FBX est un format contenant la majeure partie des informations d'une scène 3D.
-À l'heure actuelle, converter.py peut prendre -d ou --debug en argument pour exporter sous forme d'un fichier XML le contenu du fichier FBX pour une meilleure lisibilité de la part d'un humain. Cependant, sur des gros fichiers FBX, l'export peut être long, à cause de ma fonction de prettyprint XML qui est peu efficace.
+À l'heure actuelle, converter.py peut prendre -d ou --debug en argument pour exporter sous forme d'un fichier XML le contenu du fichier FBX pour une meilleure lisibilité de la part d'un humain.
 
 Le format FBX contient 7 sections principales, mais seules les sections «Objects» et «Connections» nous sont utiles à l'heure actuelle. GlobalSettings est utilisé une fois pour les informations sur l'axe vertical.
 
@@ -70,6 +70,7 @@ D'autres sont spécifiques à certaines sections, ou utilisées une seule fois, 
 La fonction builder_fromfbx.build va dans un premier temps extraire de l'arbre tous les objets qui nous seront utiles. Elle va ensuite extraire les connections entre les objets, et utiliser tools.extract_links pour obtenir des dictionnaires de correspondance entre les objets présents dans la scène. À l'avenir, l'utilisation d'une structure en arbre pourrait peut-être simplifier les choses, remplaçant l'utilisation des ids. Seulement je ne suis pas sûr que ça soit faisable, l'utilisation d'instances dans 3ds Max permet qu'un objet ait plusieurs parents différents.
 
 Puis vont être appelées dans l'ordre les fonctions de création de caméras et lumières, de textures, de matériaux, de géométrie, puis enfin de modèles. Chacune de ces fonctions a en charge certains objets, et se charge de les ajouter à la scène :
+(Pour le détail sur le processus de chaque fonction, s'appuyer sur les commentaires.)
 
 - light_cam_builder s'occupe des caméras et des lumières
 - textures_builder s'occupe des références aux textures
@@ -79,17 +80,36 @@ Puis vont être appelées dans l'ordre les fonctions de création de caméras et
 
 Pour finir, le fichier final XML est créé.
 
-# TODO section
+# Fonctionnalités manquantes
 
-## light_cam_builder
+## Physical cameras
 
-## texture_builder
+Les caméras de type «Physical» ne sont à l'heure actuelle pas placées dans la scène. Il semble qu'elles sont référencées par les models de type «Null», mais les extraire me semble peu trivial. Les implémenter pourrait être une bonne chose, car les caméras de type physical permettent des choses intéressantes tel que l'usage de la profondeur de champ, cependant je n'ai trouvé dans le FBX aucun signe de paramètres permettant de récupérer ces réglages, et donc je doute de la faisabilité de la chose.
 
-## materials_builder
+## Transformations composées
 
-## shapes_builder
+Mitsuba Renderer ne supportant pas les shapegroup imbriquées, les hiérarchies d'objet présentes dans 3ds Max ne peuvent pas être reconstituées. Pour récupérer les transformations correctes, j'ai donc dû faire la fonction «recursive_build_hierarchy», dans models_builder.py, qui remonte la chaîne de la hiérarchie des modèles et qui applique peu à peu toutes les transformations nécessaires. Ainsi, la géométrie est correctement placée dans la scène, avec les bonnes mises à l'échelle et rotations. 
 
-## models_builder
+Cependant, à l'heure actuelle, elles ne sont appliquées que sur les formes géométriques. Les caméras et les lumières dépendant d'une hiérarchie risquent d'être mal placées au sein de la scène. Avec des fonctions plus générique, les transformations composées pourraient être appliquées à tous les models, quel que soit le type d'objet qu'ils référencent.
+
+## Propriétés des matériaux
+
+Le type de matériaux que j'ai priorisé et sur lequel j'ai tout axé est le type «Physical Material».  Pour qu'une scène soit correctement transférée, c'est le type de matériaux que je recommande. Cependant quelques propriétés manquent, parmis lesquelles :
+
+- L'usage de textures pour la transmittance spéculaire
+- L'atténuation de la transmittance spéculaire dépendant du volume (à l'heure actuelle seule la transmittance spéculaire n'en dépendant pas fonctionne)
+- Une gestion correcte de l'anisotropie. Celle de 3ds Max et de Mitsuba Renderer diffère trop pour pouvoir faire un transfert correct entre les deux, mais un transfert partiel serait mieux que rien.
+- La Transluminescence, ou Subsurface Scattering.
+
+## Éclairages
+
+L'environnement map n'est pas exporté dans le FBX.
+
+Les objets émissifs ne sont pas non plus pris en compte. Dans le cas d'objets texturés pour leur émissivité, Mitsuba ne semble pas proposer de solution, mais par contre supporte le fait qu'un objet dans son ensemble puisse émettre de la lumière. Il doit être assez simple d'extraire les informations correspondantes dans le FBX pour les objets émissifs.
+
+L'éclairage ambiant est dans les propriétés générales de la scène, ça devrait être assez rapide à implémenter.
+
+Les projecteurs de 3ds Max supportent l'ajout d'une texture, et ça tombe bien, ceux de Mitsuba aussi ! Devrait également être assez rapide à implémenter.
 
 # Améliorations possibles
 
@@ -99,9 +119,11 @@ Pour des raisons d'ergonomie et de simplicité d'accès, il serait bon de mettre
 
 Une fois lancée, cette interface vérifierait la version de Python, installerait Pillow si nécessaire, et permettrait, via une boite de dialogue simple, de paramétrer et de lancer la conversion.
 
+Pour le moment, launcher.bat s'occupe d'installer Pillow si nécessaire, mais ne vérifie pas la version de Python. converter.py vérifie la version de python et quitte si ce n'est pas la 3.
+
 ## Plus de types d'objets
 
-Pour l'instant, tous les types d'objets ne sont pas pris en compte. Les caméras physiques, les informations de transluminescence, ainsi que beaucoup d'autres détails, ne sont pas encore implémentés. Le fichier FBX contenant des informations limitées, il faudra dans un premier temps récupérer tout ce qui est possible de récupérer. L'utilisation d'un autre format (ASE par exemple) pour compléter les information peut également être envisagé. L'exemple de l'environnement mapping, présent dans le ASE mais pas dans le FBX, est un bon exemple des limitations du format.
+Pour l'instant, tous les types d'objets ne sont pas pris en compte. Les détails sont dans la section «Fonctionnalités manquantes». Le fichier FBX contenant des informations limitées, il faudra dans un premier temps récupérer tout ce qui est possible de récupérer. L'utilisation d'un autre format (ASE par exemple) pour compléter les information peut également être envisagé. L'exemple de l'environnement mapping, présent dans le ASE mais pas dans le FBX, est un bon exemple des limitations du format.
 
 ## Programme plus générique, code plus court.
 
@@ -111,4 +133,4 @@ La partie materials_builder est très linéaire dans son exécution, avec beauco
 
 ## Conversions plus précises
 
-Le programme utilise actuellement des algorithmes arbitraires et approximatifs pour la conversion de la carte de glossiness et de la couleur exprimée en Kelvin. Il faudrait raffiner ces algorithmes pour plus de fidélité à la scène originale.
+Le programme utilise actuellement des algorithmes arbitraires et approximatifs pour la conversion de la carte de glossiness et de la couleur exprimée en Kelvin. Il faudrait raffiner ces algorithmes pour plus de fidélité à la scène originale. Même chose pour le simple paramètre non texturé de roughness.

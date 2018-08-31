@@ -2,6 +2,7 @@
 # Default values
 
 upvector = "0 1 0"
+curr_place=""
 filename = ""
 filepath = ""
 verbose  = False

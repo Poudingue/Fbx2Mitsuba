@@ -4,7 +4,7 @@ import tools
 import config
 import xml.etree.ElementTree as etree
 
-def recursive_build_hierarchy(root, shapes_ids, object, links_simple, links_revert, models_id, id) :
+def recursive_build_hierarchy(root, object, links_simple, links_revert, models_id, id) :
 	"""
 	Retrieves and apply all the transformations necessary from the hierarchy all the way to the root.
 	"""
@@ -15,7 +15,7 @@ def recursive_build_hierarchy(root, shapes_ids, object, links_simple, links_reve
 			if parent_id == "0" : # End recursion and add the transformation
 				root.append(current_object)
 			else :
-				recursive_build_hierarchy(root, shapes_ids, current_object, links_simple, links_revert, models_id, parent_id)
+				recursive_build_hierarchy(root, current_object, links_simple, links_revert, models_id, parent_id)
 
 
 def build(root, models, links_simple, links_revert, shapes_ids):
@@ -42,7 +42,7 @@ def build(root, models, links_simple, links_revert, shapes_ids):
 					curr_shape.set("type", "instance")
 					curr_ref = etree.SubElement(curr_shape, "ref")
 					curr_ref.set("id", link)
-					recursive_build_hierarchy(root, shapes_ids, curr_shape, links_simple, links_revert, models_id, id)
+					recursive_build_hierarchy(root, curr_shape, links_simple, links_revert, models_id, id)
 
 		elif config.verbose :
 			print("id "+id+" not in links_simple")

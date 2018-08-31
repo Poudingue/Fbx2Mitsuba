@@ -120,10 +120,10 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 						uv.append(uv_in[2*index : 2*index+2])
 				else :
 					print("Unknown ReferenceInformationType for uv in obj "+id)
-					uv = ["0 0"]*nb_poly_ind
+					uv = ["0 0"] * nb_poly_ind
 			else :
 				if config.verbose : print("No uv for object with id "+id+". Using default of 0, 0")
-				uv = ["0 0"]*nb_poly_ind
+				uv = ["0 0"] * nb_poly_ind
 
 
 			materials = geometry.find("LayerElementMaterial")
@@ -137,7 +137,7 @@ def build(root, geometries, materials_ids, links_simple, links_revert):
 			shapegroup = tools.create_obj(root, "shape", "shapegroup", id)
 
 			# Initialize
-			for i in range(max_material+1) :
+			for i in range(max_material + 1) :
 
 				vertex_text = []
 				poly_index  = []

@@ -1,12 +1,12 @@
 import sys
+import os
+
 
 if sys.version_info[0] != 3 :
 	print("Running in python "+sys.version_info[0]+", should be python 3.")
 	print("Please install python 3.7 from the official site python.org")
 	print("Exiting now.")
 	exit()
-
-
 
 import shutil
 import argparse
@@ -31,12 +31,11 @@ if args.closest and args.realist :
 
 fullname = args.file
 
-print(fullname)
-print(fullname.split(".")[-1].lower())
 if fullname.split(".")[-1].lower() != "fbx" :
 	print("The file is not an fbx file")
 	exit(0)
 
+config.curr_place = os.path.dirname(os.path.abspath(__file__))
 config.filename = ".".join(fullname.split(".")[:-1]).split("\\")[-1]#Remove extension, remove path.
 config.filepath = "\\".join(fullname.split("\\")[:-1])+"\\"#Keep only path
 config.verbose  = args.verbose
