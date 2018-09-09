@@ -10,5 +10,5 @@ goto eof
 : execution
 echo Pillow installation...
 pip install Pillow
-python %~dp0\converter.py "%~1" "-v"
+python "%~dp0\converter.py" "%~1" "-v"
 pause
