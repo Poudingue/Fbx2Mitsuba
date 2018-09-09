@@ -57,14 +57,25 @@ def build(root, materials, textures_id, links_param, links_param_revert):
 		if "3dsMax|Parameters|roughness" in properties :
 			if "3dsMax|Parameters|roughness_map" in linked : # Use a texture
 				inverted_roughness = properties["3dsMax|Parameters|roughness_inv"][-1] == "1"
-				reference = tools.roughness_convert(textures_id[linked["3dsMax|Parameters|roughness_map"]], inverted_roughness)
-				filename = textures_id[linked["3dsMax|Parameters|roughness_map"]].replace("\\","/").split("/")[-1]
+				texture_properties = textures_id[linked["3dsMax|Parameters|roughness_map"]]
+				filename = texture_properties["reference"].replace("\\","/").split("/")[-1]
+
+				roughness_reference = tools.roughness_convert(filename, inverted_roughness)
+
+				uoff, voff         = texture_properties["Translation"][-3:-1] if "Translation" in texture_properties else ["0", "0"]
+				uscaling, vscaling = texture_properties["Scaling"]    [-3:-1] if "Scaling"     in texture_properties else ["1", "1"]
 
 				# Create a new texture
 				curr_roughness = tools.new_obj("texture", "bitmap")
 				curr_roughness.set("name", "alpha")
-				tools.set_value(curr_roughness, "float",  "vscale", "-1")# TODO Use the vscale of the texture
-				tools.set_value(curr_roughness, "string", "filename", reference)
+
+				# Avoid cluttering for the final file, removing 0 offsets and 1 scaling
+				if uoff     != "0" : tools.set_value(curr_roughness, "float", "uoffset", uoff)
+				if voff     != "0" : tools.set_value(curr_roughness, "float", "voffset", voff)
+				if uscaling != "1" : tools.set_value(curr_roughness, "float", "uscale",  uscaling)
+				if vscaling !="-1" : tools.set_value(curr_roughness, "float", "vscale",  str(-float(vscaling)))
+
+				tools.set_value(curr_roughness, "string", "filename", roughness_reference)
 			else : # Use a value
 				roughness = .5*float(properties["3dsMax|Parameters|roughness"][-1])
 				if roughness == 0 :

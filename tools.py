@@ -66,7 +66,7 @@ def roughness_convert(reference, invert) :
 	if not pilimported :
 		print("Pillow doesn't seem to be installed, roughness maps may cause some problems.")
 		return reference
-	reference = config.filepath+"export\\"+reference
+	reference = config.filepath+"export\\textures\\"+reference
 	input = Image.open(reference)# Convert to luminance
 	# ri means roughnes inverted, r just roughness.
 	# Different names in case the same texture is used for roughness, revert roughness, and something else.

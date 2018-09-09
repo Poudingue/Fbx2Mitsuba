@@ -54,8 +54,8 @@ def build(root, textures, links_param_revert):
 		if id not in links_param_revert :
 			if verbose : print("Texture "+reference+" never used. Not writing it to file.")
 		elif any(reference.lower().endswith(s) for s in [".bmp",".jpg",".png",".tga",".exr"]):
-
-			textures_id[id] = reference
+			textures_id[id] = properties
+			textures_id[id]["reference"] = reference
 			curr_texture = tools.create_obj(root, "texture", "bitmap", id)
 			tools.set_value(curr_texture, "string", "filename", reference)
 
