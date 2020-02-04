@@ -29,7 +29,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 
 ## What won't be converted
 
-### Should be fixed one day or another
+### Could be fixed one day or another
 
 - Physical cameras
 - Other photometric lights
@@ -38,7 +38,7 @@ A converter from FBX (3ds Max exported scenes) to Mitsuba Renderer scenes.
 	- Subsurface scattering
 	- Multilayer materials
 
-### Harder to fix, will try anyway
+### Harder to fix
 
 - Other light types
 - Other cameras
